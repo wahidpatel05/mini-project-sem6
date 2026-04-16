@@ -281,4 +281,54 @@ export const apiService = {
     if (!response.ok) throw new Error("Failed to fetch admin profile");
     return response.json();
   },
+
+  // ── Performance Reports ────────────────────────────────────────────────
+
+  downloadReport: async (employeeId) => {
+    const response = await fetch(
+      `${API_BASE_URL}/reports/employee/${employeeId}`,
+      {
+        headers: { ...getAuthHeader() },
+      }
+    );
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message || "Failed to download report");
+    }
+    return response;
+  },
+
+  // ── Leave & Availability ───────────────────────────────────────────────
+
+  submitLeaveRequest: async (startDate, endDate, reason) => {
+    const response = await fetch(`${API_BASE_URL}/leave/request`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+      body: JSON.stringify({ startDate, endDate, reason }),
+    });
+    return response.json();
+  },
+
+  getMyLeaveRequests: async () => {
+    const response = await fetch(`${API_BASE_URL}/leave/my-requests`, {
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    });
+    return response.json();
+  },
+
+  getAllLeaveRequests: async () => {
+    const response = await fetch(`${API_BASE_URL}/leave/all`, {
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    });
+    return response.json();
+  },
+
+  updateLeaveStatus: async (employeeId, requestId, status) => {
+    const response = await fetch(`${API_BASE_URL}/leave/${employeeId}/${requestId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+      body: JSON.stringify({ status }),
+    });
+    return response.json();
+  },
 };

@@ -679,7 +679,7 @@ exports.changePassword = async (req, res) => {
 // Get task assignment recommendations
 exports.getTaskRecommendations = async (req, res) => {
   try {
-    const { taskCategory, taskPriority } = req.query;
+    const { taskCategory, taskPriority, taskDate } = req.query;
 
     if (!taskCategory) {
       return res.status(400).json({ message: "Task category is required" });
@@ -697,10 +697,12 @@ exports.getTaskRecommendations = async (req, res) => {
     }
 
     // ML-first recommendation with automatic fallback to rule-based logic
+    // Pass taskDate so availability filtering can exclude on-leave employees
     const recommendations = await getTaskRecommendationsWithFallback(
       employees,
       taskCategory,
-      taskPriority || "Medium"
+      taskPriority || "Medium",
+      taskDate || null
     );
 
     res.status(200).json({

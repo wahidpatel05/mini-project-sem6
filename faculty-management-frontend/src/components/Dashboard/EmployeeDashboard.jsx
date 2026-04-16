@@ -6,8 +6,9 @@ import TaskList from "../TaskList/TaskList";
 import EmployeeStatistics from "../other/EmployeeStatistics";
 import NotificationsPanel from "../other/NotificationsPanel";
 import ChatRoom from "../other/ChatRoom";
+import MyLeave from "../other/MyLeave";
 import { apiService } from "../../utils/apiService";
-import { ClipboardList, ListTodo, MessageCircle, ChevronDown, ChevronUp, X } from "lucide-react";
+import { ClipboardList, ListTodo, MessageCircle, CalendarDays, ChevronDown, ChevronUp, X } from "lucide-react";
 
 /* ─── Skeleton shimmer block ─── */
 const Skeleton = ({ className = "" }) => (
@@ -211,6 +212,22 @@ const EmployeeDashboard = (props) => {
             Your Tasks
           </h2>
           <TaskList data={employeeData} onOpenTaskChat={openTaskChat} />
+        </motion.div>
+
+        {/* My Leave */}
+        <motion.div
+          custom={4}
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <CalendarDays size={17} style={{ color: "var(--accent)" }} />
+            <h2 className="text-base font-semibold" style={{ color: "var(--text)" }}>
+              My Leave
+            </h2>
+          </div>
+          <MyLeave />
         </motion.div>
 
       </div>
