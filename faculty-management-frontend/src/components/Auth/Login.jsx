@@ -77,15 +77,18 @@ function Login({ handleLogin }) {
               <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-muted)" }}>
                 Email address
               </label>
-              <div className="relative">
-                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
+              <div className="relative flex items-center">
+                <div className="absolute left-3 flex items-center justify-center pointer-events-none w-5 h-5 bg-white bg-opacity-75 rounded z-10">
+                  <Mail size={16} style={{ color: "var(--text-muted)" }} />
+                </div>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@university.edu"
                   disabled={loading}
-                  className="input-ui pl-9"
+                  className="input-ui"
+                  style={{ paddingLeft: "2.5rem" }}
                 />
               </div>
             </div>
@@ -95,15 +98,18 @@ function Login({ handleLogin }) {
               <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-muted)" }}>
                 Password
               </label>
-              <div className="relative">
-                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
+              <div className="relative flex items-center">
+                <div className="absolute left-3 flex items-center justify-center pointer-events-none w-5 h-5 bg-white bg-opacity-75 rounded z-10">
+                  <Lock size={16} style={{ color: "var(--text-muted)" }} />
+                </div>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   disabled={loading}
-                  className="input-ui pl-9 pr-10"
+                  className="input-ui pr-10"
+                  style={{ paddingLeft: "2.5rem" }}
                 />
                 <button
                   type="button"

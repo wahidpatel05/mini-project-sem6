@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "../other/Header";
 import TaskListNumbers from "../other/TaskListNumbers";
 import TaskList from "../TaskList/TaskList";
+import EmployeeStatistics from "../other/EmployeeStatistics";
 import NotificationsPanel from "../other/NotificationsPanel";
 import ChatRoom from "../other/ChatRoom";
 import { apiService } from "../../utils/apiService";
@@ -139,6 +140,8 @@ const EmployeeDashboard = (props) => {
             Task Overview
           </h2>
           <TaskListNumbers data={employeeData} />
+          
+          <EmployeeStatistics data={employeeData} />
         </motion.div>
 
         {/* Notifications */}

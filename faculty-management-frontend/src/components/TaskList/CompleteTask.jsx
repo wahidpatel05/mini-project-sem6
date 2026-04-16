@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+
 import { CheckCircle2, Calendar, FileText } from "lucide-react";
 import { getFileUrl } from "../../utils/apiService";
 
@@ -22,7 +23,7 @@ const CompleteTask = ({ data }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       whileTap={{ scale: 0.98 }}
-      className="flex-shrink-0 w-full sm:w-[300px] rounded-md p-4 sm:p-5"
+      className="flex flex-col h-full w-full rounded-md p-4 sm:p-5"
       style={{
         background: "var(--surface)",
         border: "1px solid var(--border)",
@@ -79,11 +80,14 @@ const CompleteTask = ({ data }) => {
 
       {/* ─── Status ─── */}
       <div
-        className="mt-4 flex items-center justify-center gap-2 py-2 rounded-sm text-xs font-semibold"
-        style={{ background: "rgba(16,185,129,0.12)", color: "#10B981", border: "1px solid rgba(16,185,129,0.3)" }}
+        className="mt-auto pt-4 flex items-center justify-center gap-2 rounded-sm text-xs font-semibold"
       >
-        <CheckCircle2 size={14} />
-        Completed
+        <div className="w-full py-2 flex items-center justify-center gap-2 rounded-sm"
+          style={{ background: "rgba(16,185,129,0.12)", color: "#10B981", border: "1px solid rgba(16,185,129,0.3)" }}
+        >
+          <CheckCircle2 size={14} />
+          Completed
+        </div>
       </div>
 
       {data.completedAt && (

@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+
 import { CheckCircle, XCircle, Calendar, FileText } from "lucide-react";
 import { getFileUrl } from "../../utils/apiService";
 
@@ -33,7 +34,7 @@ const AcceptTask = ({ data, onComplete, onFail, onReject, onRequestPostpone }) =
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       whileTap={{ scale: 0.98 }}
-      className="flex-shrink-0 w-full sm:w-[300px] rounded-md p-4 sm:p-5 relative overflow-hidden"
+      className="flex flex-col h-full w-full rounded-md p-4 sm:p-5"
       style={{
         background: "var(--surface)",
         border: "1px solid var(--border)",
@@ -103,7 +104,7 @@ const AcceptTask = ({ data, onComplete, onFail, onReject, onRequestPostpone }) =
       )}
 
       {/* ─── Actions ─── */}
-      <div className="mt-4 space-y-2">
+      <div className="mt-auto pt-4 space-y-2">
         <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>Upload proof files when completing</p>
         <div className="flex gap-2">
           <ActionButton onClick={onComplete} color="#10B981" dimColor="rgba(16,185,129,0.15)" icon={<CheckCircle size={14} />} label="Complete" />

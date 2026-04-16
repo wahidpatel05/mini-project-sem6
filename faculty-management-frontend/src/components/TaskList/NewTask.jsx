@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+
 import { Calendar, PlusCircle, XCircle, FileText } from "lucide-react";
 import { getFileUrl } from "../../utils/apiService";
 
@@ -32,7 +33,7 @@ const NewTask = ({ data, onAccept, onReject, onRequestPostpone }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       whileTap={{ scale: 0.98 }}
-      className="flex-shrink-0 w-full sm:w-[300px] rounded-md p-4 sm:p-5 relative"
+      className="flex flex-col h-full w-full rounded-md p-4 sm:p-5"
       style={{
         background: "var(--surface)",
         border: "1px solid var(--border)",
@@ -98,7 +99,7 @@ const NewTask = ({ data, onAccept, onReject, onRequestPostpone }) => {
       )}
 
       {/* ─── Actions ─── */}
-      <div className="mt-4 space-y-2">
+      <div className="mt-auto pt-4 space-y-2">
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={onAccept}

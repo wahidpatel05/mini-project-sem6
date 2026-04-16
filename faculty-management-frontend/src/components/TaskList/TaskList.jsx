@@ -173,32 +173,25 @@ const TaskList = ({ data, onOpenTaskChat }) => {
     <>
       {/* ─── Task Cards ─── */}
       <div className="relative group">
-        <button
-          onClick={() => scrollContainerRef.current?.scrollBy({ left: -350, behavior: "smooth" })}
-          className="absolute top-1/2 left-0 -translate-y-1/2 z-10 p-2 rounded-full border opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all hidden sm:block -ml-4"
-          style={{ background: "var(--surface-soft)", borderColor: "var(--border)", color: "var(--text-muted)" }}
-        >
-          <ChevronLeft size={22} />
-        </button>
-
-        <button
-          onClick={() => scrollContainerRef.current?.scrollBy({ left: 350, behavior: "smooth" })}
-          className="absolute top-1/2 right-0 -translate-y-1/2 z-10 p-2 rounded-full border opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all hidden sm:block -mr-4"
-          style={{ background: "var(--surface-soft)", borderColor: "var(--border)", color: "var(--text-muted)" }}
-        >
-          <ChevronRight size={22} />
-        </button>
-
         <motion.div
           id="tasklist"
-          ref={scrollContainerRef}
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="flex gap-4 sm:gap-5 overflow-x-auto py-4 px-1 snap-x snap-mandatory scroll-smooth"
-          style={{ scrollbarWidth: "none" }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 py-4 px-1"
         >
-          {data.tasks && data.tasks.map((elem, idx) => {
+          {data.tasks && data.tasks
+            .map((elem, idx) => ({ ...elem, originalIndex: idx }))
+            .sort((a, b) => {
+              const getPriorityScore = (task) => {
+                if (task.newTask) return 1;
+                if (task.active) return 2;
+                return 3;
+              };
+              return getPriorityScore(a) - getPriorityScore(b);
+            })
+            .map((elem) => {
+              const idx = elem.originalIndex;
             const chatBtn = elem.sharedTaskId && onOpenTaskChat ? (
               <motion.button
                 whileTap={{ scale: 0.97 }}
@@ -212,28 +205,28 @@ const TaskList = ({ data, onOpenTaskChat }) => {
             ) : null;
 
             if (elem.active) return (
-              <motion.div key={idx} variants={itemVariants} className="snap-start">
+              <motion.div key={idx} variants={itemVariants} className="flex flex-col h-full">
                 <AcceptTask data={elem} onComplete={() => handleCompleteClick(idx)} onFail={() => handleFailClick(idx)} onReject={() => handleRejectClick(idx)} onRequestPostpone={() => handlePostponeClick(idx, elem.taskDate)} />
                 {chatBtn}
               </motion.div>
             );
 
             if (elem.newTask) return (
-              <motion.div key={idx} variants={itemVariants} className="snap-start">
+              <motion.div key={idx} variants={itemVariants} className="flex flex-col h-full">
                 <NewTask data={elem} onAccept={() => updateTaskStatus(idx, "active")} onReject={() => handleRejectClick(idx)} onRequestPostpone={() => handlePostponeClick(idx, elem.taskDate)} />
                 {chatBtn}
               </motion.div>
             );
 
             if (elem.completed) return (
-              <motion.div key={idx} variants={itemVariants} className="snap-start">
+              <motion.div key={idx} variants={itemVariants} className="flex flex-col h-full">
                 <CompleteTask data={elem} />
                 {chatBtn}
               </motion.div>
             );
 
             if (elem.failed) return (
-              <motion.div key={idx} variants={itemVariants} className="snap-start">
+              <motion.div key={idx} variants={itemVariants} className="flex flex-col h-full">
                 <FailedTask data={elem} />
                 {chatBtn}
               </motion.div>
@@ -243,7 +236,7 @@ const TaskList = ({ data, onOpenTaskChat }) => {
               <motion.div
                 key={idx}
                 variants={itemVariants}
-                className="snap-start flex-shrink-0 w-full sm:w-[300px] rounded-md p-4"
+                className="flex flex-col h-full flex-shrink-0 w-full rounded-md p-4"
                 style={{ background: "var(--surface)", border: "1px solid var(--border)", borderLeft: "3px solid #F43F5E" }}
               >
                 <h3 className="font-bold text-sm mb-2" style={{ color: "#F43F5E" }}>Rejected Task</h3>
