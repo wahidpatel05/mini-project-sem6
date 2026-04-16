@@ -1,4 +1,4 @@
-import React, { useContext, useState, useRef } from "react";
+import React, { useContext, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
 import AcceptTask from "./AcceptTask";
@@ -19,8 +19,6 @@ const itemVariants = {
 };
 
 const TaskList = ({ data, onOpenTaskChat }) => {
-  const scrollContainerRef = useRef(null);
-
   const [, , { refreshEmployees }] = useContext(AuthContext);
 
   const [showRejectModal, setShowRejectModal] = useState(false);
