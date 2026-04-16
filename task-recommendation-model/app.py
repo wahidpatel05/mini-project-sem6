@@ -25,6 +25,14 @@ def init_real_time_model():
 
 init_real_time_model()
 
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({
+        "status": "ok", 
+        "message": "Faculty ML Microservice is running perfectly! 🚀",
+        "endpoints": ["/health", "/predict", "/learn"]
+    })
+
 @app.route('/health', methods=['GET'])
 def health_check():
     return jsonify({"status": "ok", "message": "ML Microservice is running"})
