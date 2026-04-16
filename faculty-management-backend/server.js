@@ -13,6 +13,7 @@ const employeeRoutes = require("./routes/employee");
 const taskRoutes = require("./routes/task");
 const messageRoutes = require("./routes/message");
 const reportRoutes = require("./routes/report");
+const leaveRoutes = require("./routes/leave");
 
 // Import cron jobs
 const { startCronJobs } = require("./utils/cronJobs");
@@ -121,6 +122,7 @@ app.use("/api/employees", employeeRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/leave", leaveRoutes);
 
 /* ======================================
    ROOT + HEALTH CHECK

@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ListChecks, SquarePen, UserPlus, Users, BarChart3,
-  MessageCircle, GitMerge,
+  MessageCircle, GitMerge, CalendarDays,
 } from "lucide-react";
 import Header from "../other/Header";
 import CreateTask from "../other/CreateTask";
@@ -14,6 +14,7 @@ import NotificationsPanel from "../other/NotificationsPanel";
 import ReportsAnalytics from "../other/ReportsAnalytics";
 import SharedTasksView from "../other/SharedTasksView";
 import DirectChat from "../other/DirectChat";
+import AdminLeavePanel from "../other/AdminLeavePanel";
 import { AuthContext } from "../../context/AuthProvider";
 
 const navItems = [
@@ -24,6 +25,7 @@ const navItems = [
   { key: "reports",  label: "Reports",             icon: <BarChart3 size={15} /> },
   { key: "shared",   label: "Shared Tasks",        icon: <GitMerge size={15} /> },
   { key: "chat",     label: "Messages",            icon: <MessageCircle size={15} /> },
+  { key: "leave",    label: "Leave Requests",      icon: <CalendarDays size={15} /> },
 ];
 
 const sectionTitles = {
@@ -34,6 +36,7 @@ const sectionTitles = {
   reports:  "Reports & Analytics",
   shared:   "Multi-Assignee Shared Tasks",
   chat:     "Direct Messages",
+  leave:    "Leave Requests",
 };
 
 const contentVariants = {
@@ -117,6 +120,7 @@ const AdminDashboard = (props) => {
               {activeTab === "reports"  && <ReportsAnalytics />}
               {activeTab === "shared"   && <SharedTasksView currentUser={adminCurrentUser} />}
               {activeTab === "chat"     && <DirectChat employees={userData} currentUser={adminCurrentUser} />}
+              {activeTab === "leave"    && <AdminLeavePanel />}
             </motion.div>
           </AnimatePresence>
         </div>

@@ -6,6 +6,7 @@ const {
   analyzeTaskSuitability,
   calculatePerformanceScore,
 } = require("./analyticsHelper");
+const { getAvailabilityStatus } = require("./leaveHelper");
 
 const priorityToNumber = {
   low: 1,
@@ -127,8 +128,22 @@ const predictScoreWithPython = (features) => {
   });
 };
 
-const getTaskRecommendationsWithFallback = async (employees, taskCategory, taskPriority) => {
-  const ruleBased = getTaskRecommendations(employees, taskCategory, taskPriority);
+const getTaskRecommendationsWithFallback = async (employees, taskCategory, taskPriority, taskDeadline) => {
+  // Build availability map and filter out on-leave employees when a deadline is provided
+  const availabilityMap = new Map();
+  let filteredEmployees = employees;
+
+  if (taskDeadline) {
+    employees.forEach((emp) => {
+      const status = getAvailabilityStatus(emp, taskDeadline);
+      availabilityMap.set(String(emp._id), status);
+    });
+    filteredEmployees = employees.filter(
+      (emp) => availabilityMap.get(String(emp._id)) !== "on_leave"
+    );
+  }
+
+  const ruleBased = getTaskRecommendations(filteredEmployees, taskCategory, taskPriority);
 
   try {
     const employeeById = new Map(employees.map((emp) => [String(emp._id), emp]));
@@ -158,11 +173,18 @@ const getTaskRecommendationsWithFallback = async (employees, taskCategory, taskP
           finalScoreRaw = Math.min(finalScoreRaw, 59.9);
         }
 
+        // Apply 30% penalty for employees returning soon after deadline
+        const availabilityStatus = availabilityMap.get(String(rec.employeeId)) || "available";
+        if (availabilityStatus === "returning_soon") {
+          finalScoreRaw = finalScoreRaw * 0.7;
+        }
+
         const blendedScore = Math.round(Math.max(0, Math.min(100, finalScoreRaw)) * 10) / 10;
 
         return {
           ...rec,
           overallScore: blendedScore,
+          availabilityStatus,
           performanceScore,
           suitability,
           insights: [
@@ -185,6 +207,7 @@ const getTaskRecommendationsWithFallback = async (employees, taskCategory, taskP
     console.error("ML Prediction Error:", err);
     return ruleBased.map((rec) => ({
       ...rec,
+      availabilityStatus: availabilityMap.get(String(rec.employeeId)) || "available",
       recommendationSource: "rule-fallback",
       insights: [
         "Using rule-based scoring (ML unavailable)",

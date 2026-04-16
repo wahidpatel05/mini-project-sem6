@@ -5,6 +5,28 @@ import DeleteEmployee from "../other/DeleteEmployee";
 import { Search, Download } from "lucide-react";
 import { apiService } from "../../utils/apiService";
 
+/** Returns true if the employee is on an approved leave today */
+const isOnLeaveToday = (employee) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return (employee.leaveRequests || []).some((req) => {
+    if (req.status !== "approved") return false;
+    const start = new Date(req.startDate);
+    const end = new Date(req.endDate);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+    return today >= start && today <= end;
+  });
+};
+
+const AvailabilityDot = ({ onLeave }) => (
+  <span
+    title={onLeave ? "On leave today" : "Available"}
+    className="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0"
+    style={{ background: onLeave ? "var(--danger)" : "#16A34A" }}
+  />
+);
+
 const EmployeeList = () => {
 
   const [userData] = useContext(AuthContext);
@@ -117,11 +139,14 @@ const EmployeeList = () => {
                   {emp.firstName.charAt(0).toUpperCase()}
                 </div>
 
-                <div>
-                  <h3 className="font-semibold text-gray-800">
-                    {emp.firstName}
-                  </h3>
-                  <p className="text-xs text-gray-500">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="font-semibold text-gray-800 truncate">
+                      {emp.firstName}
+                    </h3>
+                    <AvailabilityDot onLeave={isOnLeaveToday(emp)} />
+                  </div>
+                  <p className="text-xs text-gray-500 truncate">
                     {emp.email}
                   </p>
                 </div>
