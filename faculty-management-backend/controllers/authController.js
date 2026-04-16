@@ -44,6 +44,20 @@ exports.adminLogin = async (req, res) => {
   }
 };
 
+// Get Admin Profile (used by employees to resolve the admin's ID for direct chat).
+// This system has a single admin account; findOne() with no filter is intentional.
+exports.getAdminProfile = async (req, res) => {
+  try {
+    const admin = await Admin.findOne({}, "_id email").lean();
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+    res.status(200).json({ _id: admin._id, email: admin.email });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 // Employee Login
 exports.employeeLogin = async (req, res) => {
   try {

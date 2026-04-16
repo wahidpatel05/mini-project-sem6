@@ -5,7 +5,7 @@ import TaskList from "../TaskList/TaskList";
 import NotificationsPanel from "../other/NotificationsPanel";
 import ChatRoom from "../other/ChatRoom";
 import { apiService } from "../../utils/apiService";
-import { Loader2, ClipboardList, ListTodo, MessageCircle, X } from "lucide-react";
+import { Loader2, ClipboardList, ListTodo, MessageCircle, ChevronDown, ChevronUp } from "lucide-react";
 
 const EmployeeDashboard = (props) => {
   const { data, changeUser } = props;
@@ -14,6 +14,8 @@ const EmployeeDashboard = (props) => {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatRoomId, setChatRoomId] = useState(null);
   const [chatLabel, setChatLabel] = useState("");
+  const [adminId, setAdminId] = useState(null);
+  const [directChatOpen, setDirectChatOpen] = useState(false);
 
   // Build current-user identity for chat
   const currentUser = {
@@ -28,6 +30,19 @@ const EmployeeDashboard = (props) => {
     setChatLabel(`Task Chat: ${task.taskTitle}`);
     setChatOpen(true);
   };
+
+  // Compute deterministic direct-chat room ID (same formula as DirectChat.jsx)
+  const getDirectRoomId = (id1, id2) => {
+    const [a, b] = [id1, id2].sort();
+    return `direct_${a}_${b}`;
+  };
+
+  // Fetch admin profile so employee can compute the shared room ID
+  useEffect(() => {
+    apiService.getAdminProfile()
+      .then((res) => { if (res && res._id) setAdminId(res._id); })
+      .catch(() => {});
+  }, []);
 
   // Fetch employee data (auto refresh)
   useEffect(() => {
@@ -106,6 +121,37 @@ const EmployeeDashboard = (props) => {
           
           <NotificationsPanel mode="employee" data={employeeData} />
         </div>
+
+        {/* ================= Chat with Admin Section ================= */}
+        {adminId && (
+          <div className="mb-6">
+            <div className="ui-card p-4 md:p-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg md:text-xl font-semibold text-slate-900 flex items-center gap-2">
+                  <MessageCircle size={18} className="text-slate-700" />
+                  Direct Message — Admin
+                </h2>
+                <button
+                  onClick={() => setDirectChatOpen((o) => !o)}
+                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 hover:border-slate-500 font-medium transition"
+                >
+                  {directChatOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                  {directChatOpen ? "Close Chat" : "Open Chat"}
+                </button>
+              </div>
+              {directChatOpen && (
+                <div className="mt-4 h-80">
+                  <ChatRoom
+                    roomId={getDirectRoomId(currentUser.id, adminId)}
+                    roomLabel="Chat with Admin"
+                    currentUser={currentUser}
+                    onClose={() => setDirectChatOpen(false)}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* ================= Task List Section ================= */}
         <div>
