@@ -173,7 +173,7 @@ const NotificationsPanel = ({ mode = "employee", data }) => {
 
       {/* Dropdown panel */}
       {open && (
-        <div className="absolute mt-3 w-[340px] max-h-[420px] overflow-y-auto bg-white rounded-2xl shadow-xl border border-gray-200 z-50">
+        <div className="absolute right-0 mt-3 w-80 max-w-[calc(100vw-2rem)] max-h-[420px] overflow-y-auto bg-white rounded-2xl shadow-xl border border-gray-200 z-50">
           <div className="flex items-center justify-between p-4 border-b">
             <h3 className="font-semibold text-indigo-600">
               Notifications
