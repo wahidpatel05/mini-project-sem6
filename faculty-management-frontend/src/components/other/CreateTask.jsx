@@ -234,44 +234,30 @@ const CreateTask = () => {
   /* ================= UI ================= */
 
   return (
-    <div
-      className="
-      bg-white/80 backdrop-blur-xl
-      rounded-2xl shadow-xl
-      border border-gray-200
-      p-4 md:p-6
-      max-w-5xl
-    "
-    >
-      {/* ================= Header ================= */}
-
+    <div>
+      {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-
-        <div className="p-2 bg-emerald-100 rounded-lg">
-          <ClipboardPlus size={20} className="text-emerald-600" />
+        <div className="p-2 rounded-lg" style={{ background: "var(--accent-dim)" }}>
+          <ClipboardPlus size={20} style={{ color: "var(--accent)" }} />
         </div>
-
         <div>
-          <h2 className="text-lg md:text-xl font-bold text-emerald-600">
-            Create Task
-          </h2>
-          <p className="text-xs text-gray-500">
-            Assign new work to employees
-          </p>
+          <h2 className="text-lg font-bold" style={{ color: "var(--text)" }}>Create Task</h2>
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>Assign new work to faculty</p>
         </div>
-
       </div>
 
       {/* Error */}
 
       {error && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm">
+        <div className="mb-4 p-3 rounded-lg text-sm"
+          style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "var(--danger)" }}>
           {error}
         </div>
       )}
 
       {success && (
-        <div className="mb-4 p-3 bg-emerald-100 border border-emerald-300 text-emerald-700 rounded-lg text-sm">
+        <div className="mb-4 p-3 rounded-lg text-sm"
+          style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)", color: "#10B981" }}>
           {success}
         </div>
       )}
@@ -289,28 +275,37 @@ const CreateTask = () => {
 
           {/* Demo scenario quick presets */}
           <div>
-            <label className="text-xs font-semibold text-gray-600 mb-2 block">
+            <label className="text-xs font-semibold mb-2 block" style={{ color: "var(--text-muted)" }}>
               Demo Scenarios (Quick Fill)
             </label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => applyDemoScenario("frontend")}
-                className="px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold hover:bg-blue-100 transition"
+                className="px-3 py-2 rounded-lg text-xs font-semibold transition"
+                style={{ background: "rgba(37,99,235,0.08)", border: "1px solid rgba(37,99,235,0.2)", color: "#2563EB" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(37,99,235,0.14)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(37,99,235,0.08)")}
               >
                 Frontend High
               </button>
               <button
                 type="button"
                 onClick={() => applyDemoScenario("backend")}
-                className="px-3 py-2 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold hover:bg-rose-100 transition"
+                className="px-3 py-2 rounded-lg text-xs font-semibold transition"
+                style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "#EF4444" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(239,68,68,0.14)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(239,68,68,0.08)")}
               >
                 Backend Critical
               </button>
               <button
                 type="button"
                 onClick={() => applyDemoScenario("analytics")}
-                className="px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition"
+                className="px-3 py-2 rounded-lg text-xs font-semibold transition"
+                style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)", color: "#10B981" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(16,185,129,0.14)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(16,185,129,0.08)")}
               >
                 Analytics High
               </button>
@@ -319,7 +314,7 @@ const CreateTask = () => {
 
           {/* Title */}
           <div>
-            <label className="text-xs font-semibold text-gray-600 mb-1 block">
+            <label className="text-xs font-semibold mb-1 block" style={{ color: "var(--text-muted)" }}>
               Task Title
             </label>
             <input
@@ -333,7 +328,7 @@ const CreateTask = () => {
 
           {/* Deadline */}
           <div>
-            <label className="text-xs font-semibold text-gray-600 mb-1 block">
+            <label className="text-xs font-semibold mb-1 block" style={{ color: "var(--text-muted)" }}>
               Deadline
             </label>
             <input
@@ -349,22 +344,27 @@ const CreateTask = () => {
           {/* Assign */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-semibold text-gray-600">
+              <label className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
                 Assign To
               </label>
-              {/* Toggle single / multi */}
               <div className="flex items-center gap-1 text-xs">
                 <button
                   type="button"
                   onClick={() => { setAssignMode("single"); setAssigneeIds([]); }}
-                  className={`px-2 py-0.5 rounded-full border font-semibold transition ${assignMode === "single" ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-600 border-slate-300"}`}
+                  className="px-2 py-0.5 rounded-full border font-semibold transition"
+                  style={assignMode === "single"
+                    ? { background: "var(--accent)", color: "#fff", borderColor: "var(--accent)" }
+                    : { background: "var(--surface)", color: "var(--text-muted)", borderColor: "var(--border)" }}
                 >
                   Single
                 </button>
                 <button
                   type="button"
                   onClick={() => { setAssignMode("multi"); setAssignTo(""); }}
-                  className={`flex items-center gap-1 px-2 py-0.5 rounded-full border font-semibold transition ${assignMode === "multi" ? "bg-violet-700 text-white border-violet-700" : "bg-white text-slate-600 border-slate-300"}`}
+                  className="flex items-center gap-1 px-2 py-0.5 rounded-full border font-semibold transition"
+                  style={assignMode === "multi"
+                    ? { background: "#7C3AED", color: "#fff", borderColor: "#7C3AED" }
+                    : { background: "var(--surface)", color: "var(--text-muted)", borderColor: "var(--border)" }}
                 >
                   <Users size={11} /> Multi
                 </button>
@@ -386,14 +386,21 @@ const CreateTask = () => {
                 ))}
               </select>
             ) : (
-              <div className="border border-slate-300 rounded-lg bg-white max-h-36 overflow-y-auto p-2 space-y-1">
+              <div
+                className="rounded-lg max-h-36 overflow-y-auto p-2 space-y-1"
+                style={{ border: "1px solid var(--border)", background: "var(--surface)" }}
+              >
                 {userData?.length === 0 && (
-                  <p className="text-xs text-slate-400 p-1">No employees found</p>
+                  <p className="text-xs p-1" style={{ color: "var(--text-muted)" }}>No employees found</p>
                 )}
                 {userData?.map((emp) => {
                   const checked = assigneeIds.includes(emp._id);
                   return (
-                    <label key={emp._id} className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 rounded px-2 py-1">
+                    <label key={emp._id} className="flex items-center gap-2 cursor-pointer rounded px-2 py-1 transition"
+                      style={{ background: checked ? "var(--accent-dim)" : "transparent" }}
+                      onMouseEnter={(e) => { if (!checked) e.currentTarget.style.background = "var(--surface-soft)"; }}
+                      onMouseLeave={(e) => { if (!checked) e.currentTarget.style.background = "transparent"; }}
+                    >
                       <input
                         type="checkbox"
                         checked={checked}
@@ -402,9 +409,9 @@ const CreateTask = () => {
                             checked ? prev.filter((id) => id !== emp._id) : [...prev, emp._id]
                           );
                         }}
-                        className="accent-violet-700"
+                        style={{ accentColor: "var(--accent)" }}
                       />
-                      <span className="text-sm text-slate-700">{emp.firstName}</span>
+                      <span className="text-sm" style={{ color: "var(--text)" }}>{emp.firstName}</span>
                     </label>
                   );
                 })}
@@ -412,13 +419,13 @@ const CreateTask = () => {
             )}
 
             {assignMode === "multi" && assigneeIds.length > 0 && (
-              <p className="text-xs text-violet-700 mt-1">{assigneeIds.length} employee(s) selected — a group chat room will be auto-created.</p>
+              <p className="text-xs mt-1" style={{ color: "#7C3AED" }}>{assigneeIds.length} employee(s) selected — a group chat room will be auto-created.</p>
             )}
           </div>
 
           {/* Category */}
           <div>
-            <label className="text-xs font-semibold text-gray-600 mb-1 block">
+            <label className="text-xs font-semibold mb-1 block" style={{ color: "var(--text-muted)" }}>
               Category
             </label>
             <input
@@ -432,7 +439,7 @@ const CreateTask = () => {
 
           {/* Priority */}
           <div>
-            <label className="text-xs font-semibold text-gray-600 mb-1 block">
+            <label className="text-xs font-semibold mb-1 block" style={{ color: "var(--text-muted)" }}>
               Priority
             </label>
             <select
@@ -450,7 +457,7 @@ const CreateTask = () => {
 
           {/* Description */}
           <div>
-            <label className="text-xs font-semibold text-gray-600 mb-1 block">
+            <label className="text-xs font-semibold mb-1 block" style={{ color: "var(--text-muted)" }}>
               Description
             </label>
             <textarea
@@ -463,12 +470,17 @@ const CreateTask = () => {
             />
           </div>
 
-          {/* FILE ATTACHMENTS */}
+          {/* Attachments */}
           <div>
-            <label className="text-xs font-semibold text-gray-600 mb-2 block">
+            <label className="text-xs font-semibold mb-2 block" style={{ color: "var(--text-muted)" }}>
               Attachments (Optional)
             </label>
-            <div className="border-2 border-dashed border-emerald-300 rounded-lg p-4 text-center hover:border-emerald-500 transition cursor-pointer bg-emerald-50">
+            <div
+              className="rounded-lg p-4 text-center transition cursor-pointer"
+              style={{ border: "2px dashed var(--border)", background: "var(--surface-soft)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
+            >
               <input
                 type="file"
                 multiple
@@ -479,31 +491,31 @@ const CreateTask = () => {
                 id="file-input"
               />
               <label htmlFor="file-input" className="cursor-pointer">
-                <Upload size={20} className="mx-auto text-emerald-600 mb-2" />
-                <p className="text-sm font-semibold text-emerald-700">
+                <Upload size={20} className="mx-auto mb-2" style={{ color: "var(--accent)" }} />
+                <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>
                   Click to upload or drag and drop
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
                   PDF, JPG, PNG, GIF, WebP (Max 10MB, Max 5 files)
                 </p>
               </label>
             </div>
 
-            {/* Attached files list */}
             {attachments.length > 0 && (
               <div className="mt-3 space-y-2">
                 {attachments.map((file, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between bg-emerald-50 p-2 rounded-lg border border-emerald-200"
+                    className="flex items-center justify-between p-2 rounded-lg"
+                    style={{ background: "var(--surface-soft)", border: "1px solid var(--border)" }}
                   >
-                    <span className="text-xs text-gray-700 truncate">
+                    <span className="text-xs truncate" style={{ color: "var(--text)" }}>
                       {file.name}
                     </span>
                     <button
                       type="button"
                       onClick={() => removeAttachment(index)}
-                      className="text-red-500 hover:text-red-700"
+                      style={{ color: "var(--danger)" }}
                     >
                       <X size={16} />
                     </button>
@@ -513,26 +525,25 @@ const CreateTask = () => {
             )}
           </div>
 
-          {/* SUBMIT */}
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className={`
-            w-full py-3 rounded-lg font-semibold
-            transition flex justify-center items-center gap-2
-            ${
+            className="w-full py-3 rounded-lg font-semibold transition flex justify-center items-center gap-2 active:scale-[0.98]"
+            style={
               loading
-                ? "bg-emerald-300 cursor-not-allowed"
-                : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-md"
+                ? { background: "var(--surface-soft)", color: "var(--text-muted)", cursor: "not-allowed" }
+                : { background: "var(--accent)", color: "#fff" }
             }
-          `}
+            onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = "#1d4ed8"; }}
+            onMouseLeave={(e) => { if (!loading) e.currentTarget.style.background = "var(--accent)"; }}
           >
             {loading ? "Creating..." : "Create Task"}
           </button>
 
         </div>
 
-        {/* ================= RIGHT COLUMN (RECOMMENDATIONS) ================= */}
+        {/* RIGHT COLUMN — Recommendations */}
 
         <div className="lg:col-span-1">
           <TaskRecommendation
@@ -544,7 +555,8 @@ const CreateTask = () => {
               setAssignMode("single");
               setAssignTo(employeeId);
             }}
-          />        </div>
+          />
+        </div>
 
       </form>
 

@@ -367,7 +367,7 @@ const DarkModal = ({ children, onClose }) => (
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
     className="fixed inset-0 z-50 flex items-center justify-center"
-    style={{ background: "rgba(0,0,0,0.7)" }}
+    style={{ background: "rgba(15,23,42,0.4)" }}
     onClick={onClose}
   >
     <motion.div
@@ -375,7 +375,7 @@ const DarkModal = ({ children, onClose }) => (
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.94, y: 16 }}
       transition={{ type: "spring", stiffness: 320, damping: 26 }}
-      className="w-full max-w-md mx-4 rounded-md p-5 sm:p-6 max-h-[90vh] overflow-y-auto"
+      className="w-full max-w-md mx-4 rounded-xl p-5 sm:p-6 max-h-[90vh] overflow-y-auto"
       style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
       onClick={(e) => e.stopPropagation()}
     >

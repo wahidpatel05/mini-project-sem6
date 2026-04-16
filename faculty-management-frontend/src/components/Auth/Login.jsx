@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Mail, Lock, Eye, EyeOff, LogIn, ShieldCheck } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, LogIn, GraduationCap } from "lucide-react";
 
 function Login({ handleLogin }) {
 
@@ -36,138 +36,119 @@ function Login({ handleLogin }) {
   };
 
   return (
-    <div className="ui-shell flex items-center justify-center px-4 py-10">
-      
-      
+    <div
+      className="min-h-screen flex items-center justify-center px-4 py-10"
+      style={{ background: "var(--bg)" }}
+    >
+      <div className="w-full max-w-md">
 
-      <div className="w-full max-w-md ui-card p-6 md:p-8">
-
-        {/* ================= Header ================= */}
-
-        <div className="text-center mb-6">
-
-          <div className="w-11 h-11 mx-auto mb-3 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center">
-            <ShieldCheck size={20} className="text-slate-700" />
+        {/* Brand mark */}
+        <div className="flex flex-col items-center mb-8">
+          <div
+            className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4"
+            style={{ background: "var(--accent)" }}
+          >
+            <GraduationCap size={24} color="#fff" />
           </div>
-
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
-            Welcome Back
+          <h1 className="text-2xl font-bold" style={{ color: "var(--text)" }}>
+            Faculty Management
           </h1>
+          <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
+            Sign in to access your dashboard
+          </p>
+        </div>
 
-          <p className="text-gray-600 text-sm">
-            Login to access your dashboard
+        {/* Card */}
+        <div className="ui-card p-6 md:p-8">
+
+          {/* Error */}
+          {errorMsg && (
+            <div className="mb-5 p-3 rounded-lg text-sm text-center"
+              style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "var(--danger)" }}>
+              {errorMsg}
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={submitHandler} className="space-y-4">
+
+            {/* Email */}
+            <div>
+              <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-muted)" }}>
+                Email address
+              </label>
+              <div className="relative">
+                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@university.edu"
+                  disabled={loading}
+                  className="input-ui pl-9"
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-muted)" }}>
+                Password
+              </label>
+              <div className="relative">
+                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  disabled={loading}
+                  className="input-ui pl-9 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98] mt-2"
+              style={
+                loading
+                  ? { background: "var(--surface-soft)", color: "var(--text-muted)", cursor: "not-allowed" }
+                  : { background: "var(--accent)", color: "#fff" }
+              }
+              onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = "#1d4ed8"; }}
+              onMouseLeave={(e) => { if (!loading) e.currentTarget.style.background = "var(--accent)"; }}
+            >
+              <LogIn size={17} />
+              {loading ? "Signing in..." : "Sign In"}
+            </button>
+
+          </form>
+
+          {/* Footer */}
+          <p className="text-center text-sm mt-5" style={{ color: "var(--text-muted)" }}>
+            Don&apos;t have access?{" "}
+            <span
+              onClick={handleSignupClick}
+              className="font-semibold cursor-pointer hover:underline"
+              style={{ color: "var(--accent)" }}
+            >
+              Contact Admin
+            </span>
           </p>
 
         </div>
-
-        {/* ================= Error ================= */}
-
-        {errorMsg && (
-          <div className="mb-4 bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-lg text-sm text-center">
-            {errorMsg}
-          </div>
-        )}
-
-        {/* ================= Form ================= */}
-
-        <form onSubmit={submitHandler} className="space-y-5">
-
-          {/* Email */}
-
-          <div className="relative">
-
-            <Mail
-              size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-            />
-
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email address"
-              disabled={loading}
-              className="
-              w-full pl-10 pr-4 py-3
-              rounded-lg border border-slate-300 bg-white
-              focus:ring-2 focus:ring-slate-300
-              outline-none transition
-            "
-            />
-
-          </div>
-
-          {/* Password */}
-
-          <div className="relative">
-
-            <Lock
-              size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-            />
-
-            <input
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              disabled={loading}
-              className="
-              w-full pl-10 pr-10 py-3
-              rounded-lg border border-slate-300 bg-white
-              focus:ring-2 focus:ring-slate-300
-              outline-none transition
-            "
-            />
-
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-
-          </div>
-
-          {/* Submit */}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className={`
-            w-full py-3 rounded-lg font-semibold
-            flex items-center justify-center gap-2
-            transition
-            ${
-              loading
-                ? "bg-slate-300 cursor-not-allowed"
-                : "bg-slate-900 hover:bg-slate-800 text-white"
-            }
-          `}
-          >
-            <LogIn size={18} />
-            {loading ? "Logging in..." : "Login"}
-          </button>
-
-        </form>
-
-        {/* ================= Footer ================= */}
-
-        <p className="text-center text-sm text-gray-600 mt-6">
-
-          Don’t have access?{" "}
-          <span
-            onClick={handleSignupClick}
-            className="text-slate-900 font-semibold cursor-pointer hover:underline"
-          >
-            Contact Admin
-          </span>
-
-        </p>
-
       </div>
-
     </div>
   );
 }
