@@ -273,4 +273,12 @@ export const apiService = {
     });
     return response.json();
   },
+
+  getAdminProfile: async () => {
+    const response = await fetch(`${API_BASE_URL}/auth/admin-profile`, {
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    });
+    if (!response.ok) throw new Error("Failed to fetch admin profile");
+    return response.json();
+  },
 };
