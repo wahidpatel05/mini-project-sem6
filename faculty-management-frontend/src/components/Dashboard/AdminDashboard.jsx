@@ -18,22 +18,24 @@ import AdminLeavePanel from "../other/AdminLeavePanel";
 import { AuthContext } from "../../context/AuthProvider";
 
 const navItems = [
-  { key: "tasks",    label: "View Tasks",         icon: <ListChecks size={15} /> },
+  { key: "overview", label: "Overview",            icon: <BarChart3 size={15} /> },
+  { key: "tasks",    label: "View Tasks",          icon: <ListChecks size={15} /> },
   { key: "task",     label: "Create Task",         icon: <SquarePen size={15} /> },
   { key: "employee", label: "Add Employee",        icon: <UserPlus size={15} /> },
   { key: "manage",   label: "Manage",              icon: <Users size={15} /> },
-  { key: "reports",  label: "Reports",             icon: <BarChart3 size={15} /> },
+  { key: "reports",  label: "Stats & AI",          icon: <BarChart3 size={15} /> },
   { key: "shared",   label: "Shared Tasks",        icon: <GitMerge size={15} /> },
   { key: "chat",     label: "Messages",            icon: <MessageCircle size={15} /> },
   { key: "leave",    label: "Leave Requests",      icon: <CalendarDays size={15} /> },
 ];
 
 const sectionTitles = {
+  overview: "Dashboard Overview",
   tasks:    "All Assigned Tasks",
   task:     "Create New Task",
   employee: "Add New Employee",
   manage:   "Manage Employees",
-  reports:  "Reports & Analytics",
+  reports:  "Performance & AI Analytics",
   shared:   "Multi-Assignee Shared Tasks",
   chat:     "Direct Messages",
   leave:    "Leave Requests",
@@ -46,7 +48,7 @@ const contentVariants = {
 };
 
 const AdminDashboard = (props) => {
-  const [activeTab, setActiveTab] = useState("tasks");
+  const [activeTab, setActiveTab] = useState("overview");
   const [userData, , { refreshEmployees }] = useContext(AuthContext);
 
   const adminCurrentUser = (() => {
@@ -94,13 +96,10 @@ const AdminDashboard = (props) => {
       </div>
 
       {/* ─── Main Content ─── */}
-      <main className="max-w-6xl mx-auto p-4 md:p-6 flex flex-col gap-5">
-
-        {/* Notifications */}
-        <NotificationsPanel mode="admin" data={userData} />
+      <main className="max-w-[85rem] mx-auto p-4 md:p-6 flex flex-col gap-6">
 
         {/* Content Panel */}
-        <div className="ui-card p-5 md:p-7 min-h-[60vh]">
+        <div className="ui-card p-5 md:p-7 min-h-[70vh]">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -109,9 +108,23 @@ const AdminDashboard = (props) => {
               animate="animate"
               exit="exit"
             >
-              <h2 className="text-lg font-semibold mb-5" style={{ color: "var(--accent)" }}>
+              <h2 className="text-xl font-bold mb-6 flex items-center gap-2" style={{ color: "var(--accent)" }}>
+                {navItems.find(i => i.key === activeTab)?.icon}
                 {sectionTitles[activeTab]}
               </h2>
+
+              {activeTab === "overview" && (
+                <div className="flex flex-col gap-6">
+                  <NotificationsPanel mode="admin" data={userData} />
+                  <div className="p-1 rounded-lg" style={{ background: "var(--surface-soft)", border: "1px solid var(--border)" }}>
+                    <h2 className="text-base font-bold m-4 flex items-center gap-2" style={{ color: "var(--text)" }}>
+                      <ListChecks size={18} style={{ color: "var(--accent)" }} />
+                      Employee Task Breakdown
+                    </h2>
+                    <AllTask />
+                  </div>
+                </div>
+              )}
 
               {activeTab === "employee" && <CreateEmployee />}
               {activeTab === "task"     && <CreateTask />}
@@ -123,15 +136,6 @@ const AdminDashboard = (props) => {
               {activeTab === "leave"    && <AdminLeavePanel />}
             </motion.div>
           </AnimatePresence>
-        </div>
-
-        {/* Task Overview */}
-        <div className="ui-card p-5 md:p-6">
-          <h2 className="text-base font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--text)" }}>
-            <ListChecks size={18} style={{ color: "var(--accent)" }} />
-            Task Overview
-          </h2>
-          <AllTask />
         </div>
 
       </main>

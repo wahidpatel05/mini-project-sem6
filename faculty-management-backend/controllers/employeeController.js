@@ -4,6 +4,8 @@ const markOverdueTasks = require("../utils/taskHelper");
 const { getTaskRecommendationsWithFallback } = require("../utils/mlRecommendationHelper");
 const { sendWelcomeEmail, sendPasswordChangedEmail, sendTaskAssignedEmail } = require("../utils/emailService");
 
+const { isEmployeeAvailable } = require("../utils/leaveHelper");
+
 // Get all employees
 exports.getAllEmployees = async (req, res) => {
   try {
@@ -177,6 +179,12 @@ exports.addTask = async (req, res) => {
 
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
+    }
+
+    // Check if employee is on leave on taskDate
+    const isAvailable = await isEmployeeAvailable(employeeId, task.taskDate);
+    if (!isAvailable) {
+      return res.status(400).json({ message: "Employee is on leave on the deadline date" });
     }
 
     // Handle file attachments if provided

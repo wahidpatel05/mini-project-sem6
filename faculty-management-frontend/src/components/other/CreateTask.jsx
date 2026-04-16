@@ -169,6 +169,38 @@ const CreateTask = () => {
       return false;
     }
 
+    // Check if assigned employees are on leave
+    const isEmployeeOnLeave = (empId) => {
+      const emp = userData?.find(e => e._id === empId);
+      if (!emp || !emp.leaveRequests) return false;
+      
+      const target = new Date(taskDate);
+      target.setHours(0, 0, 0, 0);
+
+      return emp.leaveRequests.some(req => {
+        if (req.status !== "approved") return false;
+        const start = new Date(req.startDate);
+        const end = new Date(req.endDate);
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        return target >= start && target <= end;
+      });
+    };
+
+    if (assignMode === "single") {
+      if (isEmployeeOnLeave(assignTo)) {
+        setError("Selected employee is on leave on the given deadline date");
+        return false;
+      }
+    } else if (assignMode === "multi") {
+      const onLeaveEmployees = assigneeIds.filter(id => isEmployeeOnLeave(id));
+      if (onLeaveEmployees.length > 0) {
+        const empNames = onLeaveEmployees.map(id => userData?.find(e => e._id === id)?.firstName).join(", ");
+        setError(`Cannot assign task: ${empNames} is/are on leave on the given deadline date`);
+        return false;
+      }
+    }
+
     return true;
   };
 

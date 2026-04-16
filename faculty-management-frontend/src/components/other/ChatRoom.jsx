@@ -17,8 +17,9 @@ const SOCKET_URL = (() => {
  *  - roomLabel     {string}  display name shown in the header
  *  - currentUser   { id, name, role }
  *  - onClose       {function} called when the user dismisses the panel
+ *  - whatsappMode  {boolean} controls UI styling
  */
-const ChatRoom = ({ roomId, roomLabel, currentUser, onClose }) => {
+const ChatRoom = ({ roomId, roomLabel, currentUser, onClose, whatsappMode = false }) => {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
   const [connected, setConnected] = useState(false);
@@ -97,16 +98,27 @@ const ChatRoom = ({ roomId, roomLabel, currentUser, onClose }) => {
 
   /* ── UI ──────────────────────────────────────────────────── */
   return (
-    <div className="flex flex-col h-full bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+    <div className={`flex flex-col h-full overflow-hidden ${whatsappMode ? "bg-[#efeae2]" : "bg-white border rounded-2xl shadow-xl"} relative`}>
 
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-slate-900 text-white">
-        <div className="flex items-center gap-2">
-          <MessageCircle size={18} />
-          <span className="font-semibold text-sm truncate max-w-[200px]">{roomLabel}</span>
-          <span className={`w-2 h-2 rounded-full ${connected ? "bg-emerald-400" : "bg-slate-400"}`} />
+      <div className={`flex items-center justify-between px-4 py-3 ${whatsappMode ? "bg-[#00a884] text-white" : "bg-slate-900 border-b border-slate-200 text-white"}`}>
+        <div className="flex items-center gap-3">
+          {whatsappMode ? (
+            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-bold text-lg flex-shrink-0">
+              {roomLabel ? roomLabel.charAt(0).toUpperCase() : <MessageCircle size={18} />}
+            </div>
+          ) : (
+            <MessageCircle size={18} />
+          )}
+          <div className="flex flex-col">
+            <span className="font-semibold text-base truncate max-w-[200px] leading-tight">{roomLabel}</span>
+            <span className="text-[11px] opacity-80 flex items-center gap-1">
+              <span className={`w-1.5 h-1.5 rounded-full ${connected ? (whatsappMode ? "bg-white" : "bg-emerald-400") : "bg-slate-400"}`} />
+              {connected ? "online" : "offline"}
+            </span>
+          </div>
         </div>
-        {onClose && (
+        {!whatsappMode && onClose && (
           <button onClick={onClose} className="text-slate-300 hover:text-white transition">
             <X size={18} />
           </button>
@@ -114,31 +126,42 @@ const ChatRoom = ({ roomId, roomLabel, currentUser, onClose }) => {
       </div>
 
       {/* Message List */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
+      <div
+        className={`flex-1 overflow-y-auto p-4 space-y-3 ${whatsappMode ? "bg-[#efeae2]" : "bg-slate-50"}`}
+        style={whatsappMode ? {
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d8cfc4' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        } : {}}
+      >
         {loadingHistory ? (
-          <p className="text-center text-slate-400 text-sm mt-6">Loading messages…</p>
+          <p className={`text-center text-sm mt-6 ${whatsappMode ? "text-slate-500 bg-white/50 py-1 px-3 rounded-md mx-auto w-max shadow-sm" : "text-slate-400"}`}>Loading messages…</p>
         ) : messages.length === 0 ? (
-          <p className="text-center text-slate-400 text-sm mt-6">No messages yet. Start the conversation!</p>
+          <div className="flex justify-center mt-6">
+            <p className={`text-center text-sm ${whatsappMode ? "bg-[#ffeecd] text-slate-600 px-4 py-2 rounded-lg shadow-sm" : "text-slate-400"}`}>
+              Check encryption. This chat is secured end-to-end.
+            </p>
+          </div>
         ) : (
           messages.map((msg, idx) => {
             const isOwn = msg.senderId === currentUser.id;
             return (
               <div key={msg._id || idx} className={`flex flex-col ${isOwn ? "items-end" : "items-start"}`}>
-                <div className={`max-w-[75%] px-3 py-2 rounded-xl text-sm ${
-                  isOwn
-                    ? "bg-slate-900 text-white rounded-br-none"
-                    : "bg-white border border-slate-200 text-slate-800 rounded-bl-none shadow-sm"
+                <div className={`max-w-[75%] px-3 py-2 text-sm relative shadow-sm ${
+                  whatsappMode 
+                    ? (isOwn ? "bg-[#d9fdd3] text-slate-800 rounded-lg rounded-tr-none" : "bg-white text-slate-800 rounded-lg rounded-tl-none")
+                    : (isOwn ? "bg-slate-900 text-white rounded-xl rounded-br-none" : "bg-white border border-slate-200 text-slate-800 rounded-xl rounded-bl-none")
                 }`}>
-                  {!isOwn && (
+                  {!whatsappMode && !isOwn && (
                     <p className="text-xs font-semibold text-slate-500 mb-1">{msg.senderName}</p>
                   )}
+                  {whatsappMode && !isOwn && currentUser.role !== "employee" && (
+                    <p className="text-[11px] font-bold text-emerald-600 mb-0.5">{msg.senderName}</p>
+                  )}
                   <p className="whitespace-pre-wrap break-words">{msg.text}</p>
+                  
+                  <span className={`text-[10px] block mt-1 text-right ${whatsappMode ? "text-slate-500" : (isOwn ? "text-slate-300" : "text-slate-400")}`}>
+                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </span>
                 </div>
-                <span className="text-xs text-slate-400 mt-1 px-1">
-                  {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  {" · "}
-                  {new Date(msg.createdAt).toLocaleDateString([], { month: "short", day: "numeric" })}
-                </span>
               </div>
             );
           })
@@ -147,22 +170,22 @@ const ChatRoom = ({ roomId, roomLabel, currentUser, onClose }) => {
       </div>
 
       {/* Input */}
-      <div className="flex items-center gap-2 px-3 py-2 border-t border-slate-200 bg-white">
+      <div className={`flex items-center gap-2 px-3 py-3 ${whatsappMode ? "bg-[#f0f2f5]" : "border-t border-slate-200 bg-white"}`}>
         <textarea
           rows={1}
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Type a message…"
+          placeholder="Type a message"
           disabled={!connected}
-          className="flex-1 resize-none rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:opacity-50"
+          className={`flex-1 resize-none px-4 py-2.5 text-sm focus:outline-none disabled:opacity-50 ${whatsappMode ? "rounded-full bg-white border-none shadow-sm" : "rounded-lg border border-slate-300 focus:ring-2 focus:ring-slate-300"}`}
         />
         <button
           onClick={sendMessage}
           disabled={!connected || !inputText.trim()}
-          className="p-2 rounded-lg bg-slate-900 text-white disabled:opacity-40 hover:bg-slate-700 transition"
+          className={`p-2.5 rounded-full flex items-center justify-center transition disabled:opacity-40 ${whatsappMode ? "bg-[#00a884] text-white hover:bg-[#008f6f]" : "bg-slate-900 text-white hover:bg-slate-700"}`}
         >
-          <Send size={16} />
+          <Send size={18} className={whatsappMode ? "ml-0.5" : ""} />
         </button>
       </div>
 

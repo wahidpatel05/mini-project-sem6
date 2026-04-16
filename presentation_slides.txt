@@ -1,4 +1,4 @@
-Presentation: Faculty Management System with ML Task Recommendation
+﻿Presentation: Faculty Management System with ML Task Recommendation
 
 *** SLIDE 1: Title Slide ***
 Title: Faculty Management System
@@ -26,8 +26,9 @@ The system is built on a full-stack architecture with a dedicated ML microservic
 - Real-Time Learning: The system employs a feedback loop ('4_real_time_learning.py') to continually update model weights locally as employees succeed or fail at tasks.
 
 *** SLIDE 5: Key Features ***
-- Specialized Dashboards: Secure Admin and Employee views with JWT Authentication mapping.
-- ML Task Recommendations: Accurate assignment suggestions replacing manual guesswork.
+- Specialized Dashboards: Tab-based navigation, scroll-free UI for Admin and Employee views.
+- ML Task Recommendations: Accurate suggestions replacing manual guesswork, integrating strict Leave Validations to prevent task assignments during active leaves.
+- WhatsApp-Style Real-Time Collaboration: Built-in chat rooms for shared tasks and a revamped direct chat UI mirroring popular messaging apps.
 - Task Lifecycle Tracking: Real-time oversight of tasks through New, Accepted, Completed, and Failed states.
 - Performance Analytics & Reporting: Visual breakdown of faculty performance via backend analytics helpers.
 - Communication & Notifications: File upload support (Multer) and automated email alerts via Nodemailer.
@@ -38,3 +39,4 @@ The system is built on a full-stack architecture with a dedicated ML microservic
   - Migrate local ML predictions to a fully scalable cloud API endpoint.
   - Implement predictive analytics for employee burnout tracking.
   - Deeper integration with third-party calendars (Google Calendar) and enterprise communication tools.
+

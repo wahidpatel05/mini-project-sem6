@@ -1,6 +1,7 @@
 const SharedTask = require("../models/SharedTask");
 const Employee = require("../models/Employee");
 const { sendTaskAssignedEmail } = require("../utils/emailService");
+const { isEmployeeAvailable } = require("../utils/leaveHelper");
 
 // Create a shared (multi-assignee) task
 exports.createSharedTask = async (req, res) => {
@@ -37,6 +38,14 @@ exports.createSharedTask = async (req, res) => {
 
     if (employees.length !== assigneeIds.length) {
       return res.status(404).json({ message: "One or more employees not found" });
+    }
+
+    // Check if any assignee is on leave
+    for (const emp of employees) {
+      const isAvailable = await isEmployeeAvailable(emp._id, taskDate);
+      if (!isAvailable) {
+        return res.status(400).json({ message: `Cannot assign task: ${emp.firstName} is on leave on the deadline date` });
+      }
     }
 
     // Handle file attachments

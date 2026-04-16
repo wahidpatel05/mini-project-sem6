@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, XCircle, CalendarDays } from "lucide-react";
+import { CheckCircle, XCircle, CalendarDays, UserMinus, Clock } from "lucide-react";
 import { apiService } from "../../utils/apiService";
+import { AuthContext } from "../../context/AuthProvider";
 
 const formatDate = (d) =>
   new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
@@ -10,6 +11,35 @@ const AdminLeavePanel = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState(null); // requestId currently being processed
+
+  const [userData] = useContext(AuthContext);
+
+  // Compute who is currently on leave
+  const currentlyOnLeave = (userData || []).filter(emp => {
+    return (emp.leaveRequests || []).some(req => {
+      if (req.status !== "approved") return false;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const start = new Date(req.startDate);
+      const end = new Date(req.endDate);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      return today >= start && today <= end;
+    });
+  }).map(emp => {
+    // Find the active leave request to display the date
+    const activeLeave = emp.leaveRequests.find(req => {
+      if (req.status !== "approved") return false;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const start = new Date(req.startDate);
+      const end = new Date(req.endDate);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      return today >= start && today <= end;
+    });
+    return { ...emp, activeLeave };
+  });
 
   const fetchRequests = async () => {
     try {
@@ -40,27 +70,70 @@ const AdminLeavePanel = () => {
   };
 
   return (
-    <div className="ui-card p-5">
-      <h3
-        className="text-sm font-semibold mb-4 flex items-center gap-2"
-        style={{ color: "var(--text)" }}
-      >
-        <CalendarDays size={15} style={{ color: "var(--accent)" }} />
-        Pending Leave Requests
-      </h3>
+    <div className="flex flex-col gap-6">
+      
+      {/* ─── Currently On Leave ─── */}
+      <div className="ui-card p-5">
+        <h3
+          className="text-sm font-semibold mb-4 flex items-center gap-2"
+          style={{ color: "var(--text)" }}
+        >
+          <UserMinus size={15} style={{ color: "var(--danger)" }} />
+          Currently On Leave
+        </h3>
 
-      {loading ? (
-        <div className="flex flex-col gap-2">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="skeleton h-14 rounded-lg" />
-          ))}
-        </div>
-      ) : requests.length === 0 ? (
-        <p className="text-sm text-center py-8" style={{ color: "var(--text-muted)" }}>
-          No pending leave requests.
-        </p>
-      ) : (
-        <div className="overflow-x-auto">
+        {currentlyOnLeave.length === 0 ? (
+          <p className="text-sm py-2" style={{ color: "var(--text-muted)" }}>
+            No one is currently on leave.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {currentlyOnLeave.map((emp) => (
+              <div 
+                key={emp._id} 
+                className="flex items-center gap-3 p-3 rounded-xl border bg-white shadow-sm"
+                style={{ borderColor: "var(--border)" }}
+              >
+                <div 
+                  className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-red-50 text-red-600 flex-shrink-0 border border-red-100"
+                >
+                  {emp.firstName.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-slate-800 truncate mb-0.5">{emp.firstName}</p>
+                  <p className="text-xs text-red-500 font-medium flex items-center gap-1">
+                    <Clock size={12} />
+                    Till {formatDate(emp.activeLeave.endDate)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ─── Pending Leave Requests ─── */}
+      <div className="ui-card p-5">
+        <h3
+          className="text-sm font-semibold mb-4 flex items-center gap-2"
+          style={{ color: "var(--text)" }}
+        >
+          <CalendarDays size={15} style={{ color: "var(--accent)" }} />
+          Pending Leave Requests
+        </h3>
+
+        {loading ? (
+          <div className="flex flex-col gap-2">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="skeleton h-14 rounded-lg" />
+            ))}
+          </div>
+        ) : requests.length === 0 ? (
+          <p className="text-sm py-4" style={{ color: "var(--text-muted)" }}>
+            No pending leave requests.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr style={{ borderBottom: "1px solid var(--border)" }}>
@@ -158,7 +231,8 @@ const AdminLeavePanel = () => {
             </tbody>
           </table>
         </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

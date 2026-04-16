@@ -6,7 +6,7 @@ const Employee = require("../models/Employee");
  *
  * @param {Object} employee - Mongoose employee document or plain object
  * @param {Date|string} deadlineDate - The task deadline date
- * @returns {"available"|"on_leave"|"returning_soon"}
+ * @returns {{ status: "available"|"on_leave"|"returning_soon", leaveUntil: string|null }}
  */
 const getAvailabilityStatus = (employee, deadlineDate) => {
   const deadline = new Date(deadlineDate);
@@ -27,16 +27,16 @@ const getAvailabilityStatus = (employee, deadlineDate) => {
 
     // On leave on the deadline date itself
     if (deadline >= start && deadline <= end) {
-      return "on_leave";
+      return { status: "on_leave", leaveUntil: leave.endDate };
     }
 
     // Leave ends within 3 days before the deadline (returning soon)
     if (end >= threeDaysBeforeDeadline && end < deadline) {
-      return "returning_soon";
+      return { status: "returning_soon", leaveUntil: leave.endDate };
     }
   }
 
-  return "available";
+  return { status: "available", leaveUntil: null };
 };
 
 /**

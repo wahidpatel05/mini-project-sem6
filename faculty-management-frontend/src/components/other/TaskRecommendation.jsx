@@ -7,16 +7,26 @@ const availabilityConfig = {
   available:      { label: "Available", icon: null, bg: null, color: null },
 };
 
-const AvailabilityBadge = ({ status }) => {
+const AvailabilityBadge = ({ status, leaveUntil }) => {
   const cfg = availabilityConfig[status];
   if (!cfg || !cfg.bg) return null;
+
+  let displayLabel = cfg.label;
+  if (status === "on_leave" && leaveUntil) {
+    const formattedDate = new Date(leaveUntil).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric'
+    });
+    displayLabel = `On Leave (till ${formattedDate})`;
+  }
+
   return (
     <span
       className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
       style={{ background: cfg.bg, color: cfg.color }}
     >
       {cfg.icon}
-      {cfg.label}
+      {displayLabel}
     </span>
   );
 };
@@ -94,8 +104,16 @@ const TaskRecommendation = ({ recommendations, loading, error, selectedEmployeeI
       {/* Top Recommendation - Highlighted */}
       {topRecommendation && (
         <div
-          onClick={() => onSelectEmployee(topRecommendation.employeeId)}
-          className={`ui-card border-2 border-emerald-200 p-5 cursor-pointer transition-all hover:border-emerald-300 ${
+          onClick={() => {
+            if (topRecommendation.availabilityStatus !== "on_leave") {
+              onSelectEmployee(topRecommendation.employeeId);
+            }
+          }}
+          className={`ui-card border-2 p-5 transition-all ${
+            topRecommendation.availabilityStatus === "on_leave"
+              ? "opacity-60 cursor-not-allowed border-red-200 grayscale-[0.3]"
+              : "cursor-pointer border-emerald-200 hover:border-emerald-300"
+          } ${
             selectedEmployeeId === topRecommendation.employeeId ? "ring-2 ring-emerald-500" : ""
           }`}
         >
@@ -114,7 +132,10 @@ const TaskRecommendation = ({ recommendations, loading, error, selectedEmployeeI
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles size={18} className="text-emerald-700" />
                 <h4 className="text-lg font-bold text-emerald-900">{topRecommendation.employeeName}</h4>
-                <AvailabilityBadge status={topRecommendation.availabilityStatus} />
+                <AvailabilityBadge 
+                  status={topRecommendation.availabilityStatus} 
+                  leaveUntil={topRecommendation.leaveUntil} 
+                />
               </div>
               <p className="text-xs text-emerald-700">{topRecommendation.email}</p>
             </div>
@@ -150,6 +171,12 @@ const TaskRecommendation = ({ recommendations, loading, error, selectedEmployeeI
                 <span className="text-emerald-800">{insight}</span>
               </div>
             ))}
+            {topRecommendation.availabilityStatus === "on_leave" && (
+              <div className="flex items-center gap-2 text-sm mt-3 pt-2 border-t border-red-100">
+                <AlertCircle size={14} className="text-red-500" />
+                <span className="text-red-600 font-medium">Task cannot be allocated because employee is on leave</span>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -159,12 +186,20 @@ const TaskRecommendation = ({ recommendations, loading, error, selectedEmployeeI
         <div>
           <h4 className="text-sm font-semibold text-gray-700 mb-2">Other Suitable Candidates:</h4>
           <div className="space-y-3">
-            {otherRecommendations.map((rec) => (
+            {otherRecommendations.map((rec) => {
+              const isLeave = rec.availabilityStatus === "on_leave";
+              return (
               <div
                 key={rec.employeeId}
-                onClick={() => onSelectEmployee(rec.employeeId)}
-                className={`bg-white rounded-xl shadow border border-gray-200 p-4 cursor-pointer transition-all hover:shadow-md hover:border-gray-300 ${
-                  selectedEmployeeId === rec.employeeId ? "ring-2 ring-emerald-500 border-emerald-400" : ""
+                onClick={() => {
+                  if (!isLeave) onSelectEmployee(rec.employeeId);
+                }}
+                className={`bg-white rounded-xl shadow border p-4 transition-all ${
+                  isLeave 
+                    ? "opacity-60 cursor-not-allowed border-red-200 grayscale-[0.3]" 
+                    : "cursor-pointer border-gray-200 hover:shadow-md hover:border-gray-300"
+                } ${
+                  selectedEmployeeId === rec.employeeId && !isLeave ? "ring-2 ring-emerald-500 border-emerald-400" : ""
                 }`}
               >
                 <div className="mb-2">
@@ -181,7 +216,10 @@ const TaskRecommendation = ({ recommendations, loading, error, selectedEmployeeI
                   <div className="flex-1">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <h4 className="font-semibold text-gray-900">{rec.employeeName}</h4>
-                      <AvailabilityBadge status={rec.availabilityStatus} />
+                      <AvailabilityBadge 
+                        status={rec.availabilityStatus} 
+                        leaveUntil={rec.leaveUntil} 
+                      />
                     </div>
                     <p className="text-xs text-gray-500">{rec.email}</p>
                   </div>
@@ -210,8 +248,16 @@ const TaskRecommendation = ({ recommendations, loading, error, selectedEmployeeI
                     <span>{rec.insights[0]}</span>
                   </p>
                 )}
+
+                {isLeave && (
+                  <p className="text-xs text-red-600 flex items-center gap-1 mt-2">
+                    <AlertCircle size={14} className="text-red-500" />
+                    <span className="font-semibold">Cannot allocate: on leave</span>
+                  </p>
+                )}
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

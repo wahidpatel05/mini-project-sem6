@@ -1,6 +1,5 @@
 const path = require("path");
 const fs = require("fs");
-const { spawn } = require("child_process");
 const {
   getTaskRecommendations,
   analyzeTaskSuitability,
@@ -18,23 +17,6 @@ const priorityToNumber = {
 const clamp01 = (value) => {
   if (Number.isNaN(value)) return 0;
   return Math.min(1, Math.max(0, value));
-};
-
-const resolvePythonCommand = () => {
-  if (process.env.PYTHON_EXECUTABLE) {
-    return process.env.PYTHON_EXECUTABLE;
-  }
-
-  const localVenvPython = path.resolve(
-    __dirname,
-    "../../task-recommendation-model/.env/Scripts/python.exe"
-  );
-
-  if (fs.existsSync(localVenvPython)) {
-    return localVenvPython;
-  }
-
-  return "python";
 };
 
 const buildFeatures = (employee, taskCategory, taskPriority) => {
@@ -79,123 +61,109 @@ const buildFeatures = (employee, taskCategory, taskPriority) => {
   };
 };
 
-const predictScoreWithPython = (features) => {
-  return new Promise((resolve, reject) => {
-    const pythonCmd = resolvePythonCommand();
-    const scriptPath = path.resolve(__dirname, "../../task-recommendation-model/predict_single.py");
-    const modelPath = path.resolve(__dirname, "../../task-recommendation-model/task_recommendation_model.pkl");
-
-    const child = spawn(pythonCmd, [scriptPath], {
-      stdio: ["pipe", "pipe", "pipe"],
+const predictBatchWithApi = async (featuresList) => {
+  const apiUrl = process.env.ML_API_URL || "http://127.0.0.1:5001";
+  
+  try {
+    const response = await fetch(`${apiUrl}/predict`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ featuresList }),
     });
 
-    let stdout = "";
-    let stderr = "";
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `ML API responded with status ${response.status}`);
+    }
 
-    const timeout = setTimeout(() => {
-      child.kill();
-      reject(new Error("ML prediction timed out"));
-    }, 15000);
-
-    child.stdout.on("data", (chunk) => {
-      stdout += chunk.toString();
-    });
-
-    child.stderr.on("data", (chunk) => {
-      stderr += chunk.toString();
-    });
-
-    child.on("error", (err) => {
-      clearTimeout(timeout);
-      reject(err);
-    });
-
-    child.on("close", (code) => {
-      clearTimeout(timeout);
-      try {
-        const output = JSON.parse((stdout || "").trim());
-        if (code !== 0 || output.error) {
-          return reject(new Error(output.error || stderr || "ML process failed"));
-        }
-        return resolve(Number(output.score));
-      } catch (err) {
-        return reject(new Error(stderr || "Invalid ML output"));
-      }
-    });
-
-    child.stdin.write(JSON.stringify({ modelPath, features }));
-    child.stdin.end();
-  });
+    const data = await response.json();
+    return data.scores;
+  } catch (error) {
+    if (error.cause && error.cause.code === 'ECONNREFUSED') {
+       console.warn(`[!] ML API not reachable at ${apiUrl}. Is the Flask server running?`);
+    }
+    throw new Error(`Failed to fetch ML predictions: ${error.message}`);
+  }
 };
 
 const getTaskRecommendationsWithFallback = async (employees, taskCategory, taskPriority, taskDeadline) => {
-  // Build availability map and filter out on-leave employees when a deadline is provided
+  // Build availability map, DO NOT filter out on-leave employees so they still show up (with status)
   const availabilityMap = new Map();
-  let filteredEmployees = employees;
+  const leaveUntilMap = new Map();
 
   if (taskDeadline) {
     employees.forEach((emp) => {
-      const status = getAvailabilityStatus(emp, taskDeadline);
+      const { status, leaveUntil } = getAvailabilityStatus(emp, taskDeadline);
       availabilityMap.set(String(emp._id), status);
+      if (leaveUntil) leaveUntilMap.set(String(emp._id), leaveUntil);
     });
-    filteredEmployees = employees.filter(
-      (emp) => availabilityMap.get(String(emp._id)) !== "on_leave"
-    );
   }
 
-  const ruleBased = getTaskRecommendations(filteredEmployees, taskCategory, taskPriority);
+  const ruleBased = getTaskRecommendations(employees, taskCategory, taskPriority);
 
   try {
     const employeeById = new Map(employees.map((emp) => [String(emp._id), emp]));
 
-    const scored = await Promise.all(
-      ruleBased.map(async (rec) => {
-        const employee = employeeById.get(String(rec.employeeId));
-        if (!employee) return rec;
-
-        const features = buildFeatures(employee, taskCategory, taskPriority);
-        const mlScore = await predictScoreWithPython(features);
-        const suitability = analyzeTaskSuitability(employee, taskCategory, taskPriority);
-        const performanceScore = calculatePerformanceScore(employee);
-
-        const categoryBoost =
-          suitability.categoryMatch >= 80 ? 14 : suitability.categoryMatch >= 60 ? 8 : 0;
-        const loadPenalty = Math.max(0, rec.currentLoad - 4) * 2;
-
-        let finalScoreRaw =
-          mlScore * 0.45 +
-          rec.overallScore * 0.2 +
-          suitability.categoryMatch * 0.35 +
-          categoryBoost -
-          loadPenalty;
-
-        if (suitability.categoryMatch < 50) {
-          finalScoreRaw = Math.min(finalScoreRaw, 59.9);
-        }
-
-        // Apply 30% penalty for employees returning soon after deadline
-        const availabilityStatus = availabilityMap.get(String(rec.employeeId)) || "available";
-        if (availabilityStatus === "returning_soon") {
-          finalScoreRaw = finalScoreRaw * 0.7;
-        }
-
-        const blendedScore = Math.round(Math.max(0, Math.min(100, finalScoreRaw)) * 10) / 10;
-
-        return {
-          ...rec,
-          overallScore: blendedScore,
-          availabilityStatus,
-          performanceScore,
-          suitability,
-          insights: [
-            `ML confidence score: ${Math.round(mlScore)} / 100`,
-            `Category fit: ${Math.round(suitability.categoryMatch)}%`,
-            ...rec.insights,
-          ].slice(0, 5),
-          recommendationSource: "ml+rule",
-        };
-      })
+    // Batch process all features instead of spanning N Python child processes
+    const validRecs = ruleBased.filter((rec) => employeeById.has(String(rec.employeeId)));
+    const featuresList = validRecs.map((rec) => 
+      buildFeatures(employeeById.get(String(rec.employeeId)), taskCategory, taskPriority)
     );
+
+    let batchScores = [];
+    if (featuresList.length > 0) {
+      batchScores = await predictBatchWithApi(featuresList);
+    }
+
+    const scored = validRecs.map((rec, index) => {
+      const employee = employeeById.get(String(rec.employeeId));
+      const mlScore = batchScores[index] !== undefined ? batchScores[index] : 50;
+      
+      const suitability = analyzeTaskSuitability(employee, taskCategory, taskPriority);
+      const performanceScore = calculatePerformanceScore(employee);
+
+      const categoryBoost =
+        suitability.categoryMatch >= 80 ? 14 : suitability.categoryMatch >= 60 ? 8 : 0;
+      const loadPenalty = Math.max(0, rec.currentLoad - 4) * 2;
+
+      let finalScoreRaw =
+        mlScore * 0.45 +
+        rec.overallScore * 0.2 +
+        suitability.categoryMatch * 0.35 +
+        categoryBoost -
+        loadPenalty;
+
+      if (suitability.categoryMatch < 50) {
+        finalScoreRaw = Math.min(finalScoreRaw, 59.9);
+      }
+
+      // Apply 30% penalty for employees returning soon after deadline
+      // Apply huge penalty for "on_leave" so they rank strictly lower
+      const availabilityStatus = availabilityMap.get(String(rec.employeeId)) || "available";
+      const leaveUntil = leaveUntilMap.get(String(rec.employeeId)) || null;
+      if (availabilityStatus === "returning_soon") {
+        finalScoreRaw = finalScoreRaw * 0.7;
+      } else if (availabilityStatus === "on_leave") {
+        finalScoreRaw = finalScoreRaw * 0.1; // heavily penalized
+      }
+
+      const blendedScore = Math.round(Math.max(0, Math.min(100, finalScoreRaw)) * 10) / 10;
+
+      return {
+        ...rec,
+        overallScore: blendedScore,
+        availabilityStatus,
+        leaveUntil,
+        performanceScore,
+        suitability,
+        insights: [
+          `ML confidence score: ${Math.round(mlScore)} / 100`,
+          `Category fit: ${Math.round(suitability.categoryMatch)}%`,
+          ...rec.insights,
+        ].slice(0, 5),
+        recommendationSource: "ml+rule",
+      };
+    });
 
     return scored.sort((a, b) => {
       if (b.suitability.categoryMatch !== a.suitability.categoryMatch) {
@@ -208,6 +176,7 @@ const getTaskRecommendationsWithFallback = async (employees, taskCategory, taskP
     return ruleBased.map((rec) => ({
       ...rec,
       availabilityStatus: availabilityMap.get(String(rec.employeeId)) || "available",
+      leaveUntil: leaveUntilMap.get(String(rec.employeeId)) || null,
       recommendationSource: "rule-fallback",
       insights: [
         "Using rule-based scoring (ML unavailable)",

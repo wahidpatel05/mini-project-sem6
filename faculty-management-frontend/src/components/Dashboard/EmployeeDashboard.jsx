@@ -24,8 +24,48 @@ const cardVariants = {
   }),
 };
 
+const navItems = [
+  { key: "overview", label: "Overview",       icon: <ClipboardList size={15} /> },
+  { key: "tasks",    label: "My Tasks",       icon: <ListTodo size={15} /> },
+  { key: "chat",     label: "Admin Message",  icon: <MessageCircle size={15} /> },
+  { key: "leave",    label: "Leave Request",  icon: <CalendarDays size={15} /> },
+];
+
+const sectionTitles = {
+  overview: "Dashboard Overview",
+  tasks:    "Assigned Tasks",
+  chat:     "Direct Message Admin",
+  leave:    "My Leaves",
+};
+
+const contentVariants = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" } },
+  exit:    { opacity: 0, y: -6, transition: { duration: 0.15 } },
+};
+
+/* ─── Nav Tab ─── */
+const NavTab = ({ label, icon, active, onClick }) => (
+  <motion.button
+    whileTap={{ scale: 0.97 }}
+    onClick={onClick}
+    className="flex items-center gap-2 px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium whitespace-nowrap border-b-2 transition-colors duration-150"
+    style={
+      active
+        ? { color: "var(--accent)", borderColor: "var(--accent)" }
+        : { color: "var(--text-muted)", borderColor: "transparent" }
+    }
+    onMouseEnter={(e) => { if (!active) e.currentTarget.style.color = "var(--text)"; }}
+    onMouseLeave={(e) => { if (!active) e.currentTarget.style.color = "var(--text-muted)"; }}
+  >
+    <span className="flex-shrink-0">{icon}</span>
+    <span>{label}</span>
+  </motion.button>
+);
+
 const EmployeeDashboard = (props) => {
   const { data, changeUser } = props;
+  const [activeTab, setActiveTab] = useState("overview");
   const [employeeData, setEmployeeData] = useState(data);
   const [loading, setLoading] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
@@ -120,115 +160,80 @@ const EmployeeDashboard = (props) => {
         className="sticky top-0 z-30"
         style={{ background: "var(--surface)", borderBottom: "1px solid var(--border)" }}
       >
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-[85rem] mx-auto">
           <Header changeUser={changeUser} data={employeeData} />
+        </div>
+
+        {/* ─── Nav Tabs ─── */}
+        <div
+          className="max-w-[85rem] mx-auto px-2 sm:px-4 overflow-x-auto flex"
+          style={{ borderTop: "1px solid var(--border)" }}
+        >
+          {navItems.map((item) => (
+            <NavTab
+              key={item.key}
+              label={item.label}
+              icon={item.icon}
+              active={activeTab === item.key}
+              onClick={() => setActiveTab(item.key)}
+            />
+          ))}
         </div>
       </div>
 
       {/* ─── Main Content ─── */}
-      <div className="max-w-6xl mx-auto p-4 md:p-6 flex flex-col gap-5">
-
-        {/* Stats */}
-        <motion.div
-          className="ui-card p-4 md:p-6"
-          custom={0}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <h2 className="text-base font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--text)" }}>
-            <ClipboardList size={17} style={{ color: "var(--accent)" }} />
-            Task Overview
-          </h2>
-          <TaskListNumbers data={employeeData} />
-          
-          <EmployeeStatistics data={employeeData} />
-        </motion.div>
-
-        {/* Notifications */}
-        <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
-          <NotificationsPanel mode="employee" data={employeeData} />
-        </motion.div>
-
-        {/* Direct Message — Admin */}
-        {adminId && (
-          <motion.div
-            className="ui-card p-4 md:p-6"
-            custom={2}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold flex items-center gap-2" style={{ color: "var(--text)" }}>
-                <MessageCircle size={17} style={{ color: "var(--accent)" }} />
-                Direct Message — Admin
+      <div className="max-w-[85rem] mx-auto p-4 md:p-6 flex flex-col gap-6">
+        
+        <div className="ui-card p-5 md:p-7 min-h-[70vh]">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              variants={contentVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              <h2 className="text-xl font-bold mb-6 flex items-center gap-2" style={{ color: "var(--accent)" }}>
+                {navItems.find(i => i.key === activeTab)?.icon}
+                {sectionTitles[activeTab]}
               </h2>
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={() => setDirectChatOpen((o) => !o)}
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border font-medium transition"
-                style={{
-                  background: directChatOpen ? "var(--accent-dim)" : "var(--surface-soft)",
-                  borderColor: directChatOpen ? "var(--accent)" : "var(--border)",
-                  color: directChatOpen ? "var(--accent)" : "var(--text-muted)",
-                }}
-              >
-                {directChatOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                {directChatOpen ? "Close" : "Open"} Chat
-              </motion.button>
-            </div>
-            <AnimatePresence>
-              {directChatOpen && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 320 }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="mt-4 overflow-hidden"
-                >
+
+              {activeTab === "overview" && (
+                <div className="flex flex-col gap-6">
+                  <NotificationsPanel mode="employee" data={employeeData} />
+                  
+                  <div className="flex flex-col gap-4">
+                    <TaskListNumbers data={employeeData} />
+                    <EmployeeStatistics data={employeeData} />
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "tasks" && (
+                <div className="min-h-[50vh]">
+                  <TaskList data={employeeData} onOpenTaskChat={openTaskChat} />
+                </div>
+              )}
+
+              {activeTab === "chat" && adminId && (
+                <div className="h-[65vh] overflow-hidden rounded-xl border" style={{ borderColor: "var(--border)" }}>
                   <ChatRoom
                     roomId={getDirectRoomId(currentUser.id, adminId)}
                     roomLabel="Chat with Admin"
                     currentUser={currentUser}
-                    onClose={() => setDirectChatOpen(false)}
+                    onClose={() => {}}
                   />
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
-          </motion.div>
-        )}
 
-        {/* Task List */}
-        <motion.div
-          className="ui-card p-4 md:p-6"
-          custom={3}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <h2 className="text-base font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--text)" }}>
-            <ListTodo size={17} style={{ color: "var(--accent)" }} />
-            Your Tasks
-          </h2>
-          <TaskList data={employeeData} onOpenTaskChat={openTaskChat} />
-        </motion.div>
-
-        {/* My Leave */}
-        <motion.div
-          custom={4}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <div className="flex items-center gap-2 mb-3 px-1">
-            <CalendarDays size={17} style={{ color: "var(--accent)" }} />
-            <h2 className="text-base font-semibold" style={{ color: "var(--text)" }}>
-              My Leave
-            </h2>
-          </div>
-          <MyLeave />
-        </motion.div>
+              {activeTab === "leave" && (
+                <div className="min-h-[50vh]">
+                  <MyLeave />
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
 
       </div>
 
