@@ -84,6 +84,19 @@ const employeeSchema = new mongoose.Schema(
       rejected: { type: Number, default: 0 },
     },
     tasks: [taskSchema],
+    leaveRequests: [
+      {
+        startDate: { type: Date, required: true },
+        endDate: { type: Date, required: true },
+        reason: { type: String, required: true },
+        status: {
+          type: String,
+          enum: ["pending", "approved", "rejected"],
+          default: "pending",
+        },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );

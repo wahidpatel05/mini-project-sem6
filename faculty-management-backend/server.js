@@ -12,6 +12,7 @@ const authRoutes = require("./routes/auth");
 const employeeRoutes = require("./routes/employee");
 const taskRoutes = require("./routes/task");
 const messageRoutes = require("./routes/message");
+const leaveRoutes = require("./routes/leave");
 
 const app = express();
 const server = http.createServer(app);
@@ -113,6 +114,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/leave", leaveRoutes);
 
 /* ======================================
    ROOT + HEALTH CHECK
