@@ -3,7 +3,11 @@ import { io } from "socket.io-client";
 import { Send, X, MessageCircle } from "lucide-react";
 import { apiService } from "../../utils/apiService";
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_BASE_URL?.replace("/api", "") || "http://localhost:5000";
+const SOCKET_URL = (() => {
+  if (import.meta.env.VITE_SOCKET_URL) return import.meta.env.VITE_SOCKET_URL;
+  if (import.meta.env.VITE_API_BASE_URL) return import.meta.env.VITE_API_BASE_URL.replace("/api", "");
+  return "http://localhost:5000";
+})();
 
 /**
  * ChatRoom

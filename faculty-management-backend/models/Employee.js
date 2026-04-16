@@ -20,7 +20,8 @@ const taskSchema = new mongoose.Schema({
     enum: ["Low", "Medium", "High", "Critical"],
     default: "Medium",
   },
-  // Reference to a SharedTask when assigned to multiple employees
+  // Reference to a SharedTask when assigned to multiple employees.
+  // Links this embedded task entry to its parent SharedTask document.
   sharedTaskId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "SharedTask",

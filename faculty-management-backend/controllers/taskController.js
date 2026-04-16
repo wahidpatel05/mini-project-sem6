@@ -97,8 +97,9 @@ exports.createSharedTask = async (req, res) => {
       emp.taskCounts.newTask += 1;
       await emp.save();
 
-      // Send notification email (fire-and-forget)
-      sendTaskAssignedEmail(emp.firstName, emp.email, { taskTitle, taskDescription, taskDate, category, priority });
+      // Send notification email (fire-and-forget, log failures)
+      sendTaskAssignedEmail(emp.firstName, emp.email, { taskTitle, taskDescription, taskDate, category, priority })
+        .catch((err) => console.error(`Failed to send task email to ${emp.email}:`, err.message));
     }
 
     const populated = await SharedTask.findById(sharedTask._id).populate("assignees.employeeId", "firstName email");
