@@ -1,8 +1,9 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { AuthContext } from "../../context/AuthProvider";
 import { apiService, getFileUrl } from "../../utils/apiService";
-import { Search, ChevronLeft, ChevronRight, FileText, Eye } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, FileText, Eye, MessageCircle } from "lucide-react";
 import TaskListNumbers from "./TaskListNumbers";
+import ChatRoom from "./ChatRoom";
 
 const PAGE_SIZE = 8;
 
@@ -33,6 +34,9 @@ const AdminTaskView = () => {
 
   const [postponeActionLoading, setPostponeActionLoading] = useState(false);
   const [postponeActionError, setPostponeActionError] = useState("");
+
+  const [activeChatRoomId, setActiveChatRoomId] = useState(null);
+  const [activeChatLabel, setActiveChatLabel] = useState("");
 
   /* ================= TASK AGGREGATION ================= */
 
@@ -246,6 +250,16 @@ const AdminTaskView = () => {
     if (task.rejected) return "Rejected";
     return "Unknown";
   };
+
+  const adminCurrentUser = (() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+      const data = stored.data || {};
+      return { id: data._id || data.id || "admin", name: data.firstName || data.email || "Admin", role: "admin" };
+    } catch {
+      return { id: "admin", name: "Admin", role: "admin" };
+    }
+  })();
 
   const formatDateTime = (value) => {
     if (!value) return "";
@@ -484,7 +498,7 @@ const STATUS_TABS = [
                     </td>
 
                     <td className="px-4 py-3">
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 flex-wrap">
                         <button
                           onClick={() => handleViewDetails(task)}
                           className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs hover:bg-blue-200 flex items-center gap-1"
@@ -498,6 +512,23 @@ const STATUS_TABS = [
                             className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-lg text-xs hover:bg-indigo-200"
                           >
                             Reassign
+                          </button>
+                        )}
+                        {task.sharedTaskId && (
+                          <button
+                            onClick={() => {
+                              const roomId = `task_${task.sharedTaskId}`;
+                              if (activeChatRoomId === roomId) {
+                                setActiveChatRoomId(null);
+                              } else {
+                                setActiveChatRoomId(roomId);
+                                setActiveChatLabel(`Group Chat: ${task.taskTitle}`);
+                              }
+                            }}
+                            className="px-3 py-1 bg-violet-100 text-violet-700 rounded-lg text-xs hover:bg-violet-200 flex items-center gap-1"
+                          >
+                            <MessageCircle size={12} />
+                            Chat
                           </button>
                         )}
                       </div>
@@ -785,6 +816,19 @@ const STATUS_TABS = [
 
           </div>
 
+        </div>
+      )}
+
+      {/* ================= FLOATING TASK CHAT PANEL ================= */}
+
+      {activeChatRoomId && (
+        <div className="fixed bottom-4 right-4 w-80 sm:w-96 z-50 shadow-2xl rounded-2xl overflow-hidden">
+          <ChatRoom
+            roomId={activeChatRoomId}
+            roomLabel={activeChatLabel}
+            currentUser={adminCurrentUser}
+            onClose={() => setActiveChatRoomId(null)}
+          />
         </div>
       )}
 

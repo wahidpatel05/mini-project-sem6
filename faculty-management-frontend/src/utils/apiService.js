@@ -231,4 +231,46 @@ export const apiService = {
     });
     return response.json();
   },
+
+  // ── Shared (Multi-Assignee) Tasks ───────────────────────────────────────
+
+  createSharedTask: async (taskData, assigneeIds, attachments = []) => {
+    const formData = new FormData();
+    formData.append("taskTitle", taskData.taskTitle);
+    formData.append("taskDescription", taskData.taskDescription);
+    formData.append("taskDate", taskData.taskDate);
+    formData.append("category", taskData.category);
+    formData.append("priority", taskData.priority);
+
+    // Send as JSON string; controller parses it
+    assigneeIds.forEach((id) => formData.append("assigneeIds", id));
+
+    attachments.forEach((file) => formData.append("attachments", file));
+
+    const token = localStorage.getItem("authToken");
+    const headers = { ...(token && { Authorization: `Bearer ${token}` }) };
+
+    const response = await fetch(`${API_BASE_URL}/tasks`, {
+      method: "POST",
+      headers,
+      body: formData,
+    });
+    return response.json();
+  },
+
+  getAllSharedTasks: async () => {
+    const response = await fetch(`${API_BASE_URL}/tasks`, {
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    });
+    return response.json();
+  },
+
+  // ── Chat Messages ──────────────────────────────────────────────────────
+
+  getMessages: async (roomId) => {
+    const response = await fetch(`${API_BASE_URL}/messages/${encodeURIComponent(roomId)}`, {
+      headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    });
+    return response.json();
+  },
 };

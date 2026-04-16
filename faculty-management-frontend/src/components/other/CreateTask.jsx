@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../context/AuthProvider";
 import { apiService } from "../../utils/apiService";
-import { ClipboardPlus, Upload, X } from "lucide-react";
+import { ClipboardPlus, Upload, X, Users } from "lucide-react";
 import TaskRecommendation from "./TaskRecommendation";
 
 const CreateTask = () => {
@@ -12,13 +12,16 @@ const CreateTask = () => {
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
   const [taskDate, setTaskDate] = useState("");
-  const [assignTo, setAssignTo] = useState("");
+  const [assignTo, setAssignTo] = useState(""); // single employee id
+  const [assignMode, setAssignMode] = useState("single"); // "single" | "multi"
+  const [assigneeIds, setAssigneeIds] = useState([]); // multi-assign ids
   const [category, setCategory] = useState("");
   const [priority, setPriority] = useState("Medium");
   const [attachments, setAttachments] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   // Recommendations state
   const [recommendations, setRecommendations] = useState([]);
@@ -142,8 +145,13 @@ const CreateTask = () => {
       return false;
     }
 
-    if (!assignTo) {
+    if (assignMode === "single" && !assignTo) {
       setError("Select an employee");
+      return false;
+    }
+
+    if (assignMode === "multi" && assigneeIds.length === 0) {
+      setError("Select at least one employee");
       return false;
     }
 
@@ -169,6 +177,7 @@ const CreateTask = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
 
     if (!validateInputs()) return;
 
@@ -189,14 +198,28 @@ const CreateTask = () => {
         rejected: false,
       };
 
-      await apiService.addTask(assignTo, newTask, attachments);
+      if (assignMode === "multi") {
+        // Multi-assignee: use the SharedTask endpoint
+        await apiService.createSharedTask(newTask, assigneeIds, attachments);
+      } else {
+        // Single assignee: use existing per-employee endpoint
+        await apiService.addTask(assignTo, newTask, attachments);
+      }
+
       await refreshEmployees();
+
+      setSuccess(
+        assignMode === "multi"
+          ? `Task assigned to ${assigneeIds.length} employee(s)!`
+          : "Task created successfully!"
+      );
 
       // Reset form
       setTaskTitle("");
       setTaskDescription("");
       setTaskDate("");
       setAssignTo("");
+      setAssigneeIds([]);
       setCategory("");
       setPriority("Medium");
       setAttachments([]);
@@ -239,11 +262,17 @@ const CreateTask = () => {
 
       </div>
 
-      {/* ================= Error ================= */}
+      {/* Error */}
 
       {error && (
         <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm">
           {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="mb-4 p-3 bg-emerald-100 border border-emerald-300 text-emerald-700 rounded-lg text-sm">
+          {success}
         </div>
       )}
 
@@ -319,22 +348,72 @@ const CreateTask = () => {
 
           {/* Assign */}
           <div>
-            <label className="text-xs font-semibold text-gray-600 mb-1 block">
-              Assign To
-            </label>
-            <select
-              value={assignTo}
-              onChange={(e) => setAssignTo(e.target.value)}
-              disabled={loading}
-              className="input-ui"
-            >
-              <option value="">Select Employee</option>
-              {userData?.map((emp) => (
-                <option key={emp._id} value={emp._id}>
-                  {emp.firstName}
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-semibold text-gray-600">
+                Assign To
+              </label>
+              {/* Toggle single / multi */}
+              <div className="flex items-center gap-1 text-xs">
+                <button
+                  type="button"
+                  onClick={() => { setAssignMode("single"); setAssigneeIds([]); }}
+                  className={`px-2 py-0.5 rounded-full border font-semibold transition ${assignMode === "single" ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-600 border-slate-300"}`}
+                >
+                  Single
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setAssignMode("multi"); setAssignTo(""); }}
+                  className={`flex items-center gap-1 px-2 py-0.5 rounded-full border font-semibold transition ${assignMode === "multi" ? "bg-violet-700 text-white border-violet-700" : "bg-white text-slate-600 border-slate-300"}`}
+                >
+                  <Users size={11} /> Multi
+                </button>
+              </div>
+            </div>
+
+            {assignMode === "single" ? (
+              <select
+                value={assignTo}
+                onChange={(e) => setAssignTo(e.target.value)}
+                disabled={loading}
+                className="input-ui"
+              >
+                <option value="">Select Employee</option>
+                {userData?.map((emp) => (
+                  <option key={emp._id} value={emp._id}>
+                    {emp.firstName}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="border border-slate-300 rounded-lg bg-white max-h-36 overflow-y-auto p-2 space-y-1">
+                {userData?.length === 0 && (
+                  <p className="text-xs text-slate-400 p-1">No employees found</p>
+                )}
+                {userData?.map((emp) => {
+                  const checked = assigneeIds.includes(emp._id);
+                  return (
+                    <label key={emp._id} className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 rounded px-2 py-1">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => {
+                          setAssigneeIds((prev) =>
+                            checked ? prev.filter((id) => id !== emp._id) : [...prev, emp._id]
+                          );
+                        }}
+                        className="accent-violet-700"
+                      />
+                      <span className="text-sm text-slate-700">{emp.firstName}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+
+            {assignMode === "multi" && assigneeIds.length > 0 && (
+              <p className="text-xs text-violet-700 mt-1">{assigneeIds.length} employee(s) selected — a group chat room will be auto-created.</p>
+            )}
           </div>
 
           {/* Category */}
@@ -461,7 +540,10 @@ const CreateTask = () => {
             loading={recommendationsLoading}
             error={recommendationsError}
             selectedEmployeeId={assignTo}
-            onSelectEmployee={(employeeId) => setAssignTo(employeeId)}
+            onSelectEmployee={(employeeId) => {
+              setAssignMode("single");
+              setAssignTo(employeeId);
+            }}
           />        </div>
 
       </form>

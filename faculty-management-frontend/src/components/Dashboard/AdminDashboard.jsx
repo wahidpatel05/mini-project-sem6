@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Menu, ListChecks, SquarePen, UserPlus, Users, BarChart3, LayoutDashboard } from "lucide-react";
+import { Menu, ListChecks, SquarePen, UserPlus, Users, BarChart3, LayoutDashboard, MessageCircle, GitMerge } from "lucide-react";
 import Header from "../other/Header";
 import CreateTask from "../other/CreateTask";
 import AllTask from "../other/AllTask";
@@ -8,6 +8,8 @@ import EmployeeList from "../other/EmployeeList";
 import AdminTaskView from "../other/AdminTaskView";
 import NotificationsPanel from "../other/NotificationsPanel";
 import ReportsAnalytics from "../other/ReportsAnalytics";
+import SharedTasksView from "../other/SharedTasksView";
+import DirectChat from "../other/DirectChat";
 import { AuthContext } from "../../context/AuthProvider";
 
 const AdminDashboard = (props) => {
@@ -16,6 +18,21 @@ const AdminDashboard = (props) => {
 
   const [userData, , { refreshEmployees }] =
     useContext(AuthContext);
+
+  // Build a currentUser object for chat (admin identity from localStorage)
+  const adminCurrentUser = (() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+      const data = stored.data || {};
+      return {
+        id: data._id || data.id || "admin",
+        name: data.firstName || data.email || "Admin",
+        role: "admin",
+      };
+    } catch {
+      return { id: "admin", name: "Admin", role: "admin" };
+    }
+  })();
 
   // Auto refresh employees
   useEffect(() => {
@@ -103,6 +120,26 @@ const AdminDashboard = (props) => {
             }}
           />
 
+          <SidebarButton
+            label="Shared Tasks"
+            icon={<GitMerge size={18} />}
+            active={activeTab === "shared"}
+            onClick={() => {
+              setActiveTab("shared");
+              setSidebarOpen(false);
+            }}
+          />
+
+          <SidebarButton
+            label="Messages"
+            icon={<MessageCircle size={18} />}
+            active={activeTab === "chat"}
+            onClick={() => {
+              setActiveTab("chat");
+              setSidebarOpen(false);
+            }}
+          />
+
         </nav>
       </aside>
 
@@ -168,6 +205,20 @@ const AdminDashboard = (props) => {
             <>
               <SectionTitle title="Reports & Analytics" color="text-indigo-600" />
               <ReportsAnalytics />
+            </>
+          )}
+
+          {activeTab === "shared" && (
+            <>
+              <SectionTitle title="Multi-Assignee Shared Tasks" color="text-violet-600" />
+              <SharedTasksView currentUser={adminCurrentUser} />
+            </>
+          )}
+
+          {activeTab === "chat" && (
+            <>
+              <SectionTitle title="Direct Messages" color="text-slate-700" />
+              <DirectChat employees={userData} currentUser={adminCurrentUser} />
             </>
           )}
 

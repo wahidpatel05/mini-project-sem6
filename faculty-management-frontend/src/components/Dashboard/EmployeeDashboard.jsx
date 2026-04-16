@@ -3,13 +3,31 @@ import Header from "../other/Header";
 import TaskListNumbers from "../other/TaskListNumbers";
 import TaskList from "../TaskList/TaskList";
 import NotificationsPanel from "../other/NotificationsPanel";
+import ChatRoom from "../other/ChatRoom";
 import { apiService } from "../../utils/apiService";
-import { Loader2, ClipboardList, ListTodo } from "lucide-react";
+import { Loader2, ClipboardList, ListTodo, MessageCircle, X } from "lucide-react";
 
 const EmployeeDashboard = (props) => {
   const { data, changeUser } = props;
   const [employeeData, setEmployeeData] = useState(data);
   const [loading, setLoading] = useState(true);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatRoomId, setChatRoomId] = useState(null);
+  const [chatLabel, setChatLabel] = useState("");
+
+  // Build current-user identity for chat
+  const currentUser = {
+    id: data?._id || data?.id || "emp",
+    name: data?.firstName || "Employee",
+    role: "employee",
+  };
+
+  const openTaskChat = (task) => {
+    if (!task.sharedTaskId) return;
+    setChatRoomId(`task_${task.sharedTaskId}`);
+    setChatLabel(`Task Chat: ${task.taskTitle}`);
+    setChatOpen(true);
+  };
 
   // Fetch employee data (auto refresh)
   useEffect(() => {
@@ -98,9 +116,21 @@ const EmployeeDashboard = (props) => {
               Your Tasks
             </h2>
 
-            <TaskList data={employeeData} />
+            <TaskList data={employeeData} onOpenTaskChat={openTaskChat} />
           </div>
         </div>
+
+        {/* ================= Task Chat Panel ================= */}
+        {chatOpen && chatRoomId && (
+          <div className="fixed bottom-4 right-4 w-80 sm:w-96 z-50 shadow-2xl rounded-2xl overflow-hidden">
+            <ChatRoom
+              roomId={chatRoomId}
+              roomLabel={chatLabel}
+              currentUser={currentUser}
+              onClose={() => setChatOpen(false)}
+            />
+          </div>
+        )}
 
       </div>
     </div>
