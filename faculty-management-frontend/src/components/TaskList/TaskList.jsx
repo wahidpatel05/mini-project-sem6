@@ -1,5 +1,5 @@
 import React, { useContext, useState, useRef } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
 import AcceptTask from "./AcceptTask";
 import NewTask from "./NewTask";
 import CompleteTask from "./CompleteTask";
@@ -7,7 +7,7 @@ import FailedTask from "./FailedTask";
 import { AuthContext } from "../../context/AuthProvider";
 import { apiService } from "../../utils/apiService";
 
-const TaskList = ({ data }) => {
+const TaskList = ({ data, onOpenTaskChat }) => {
   const scrollContainerRef = useRef(null);
 
   const [, , { refreshEmployees }] =
@@ -239,6 +239,16 @@ const TaskList = ({ data }) => {
       >
         {data.tasks &&
           data.tasks.map((elem, idx) => {
+            const chatBtn = elem.sharedTaskId && onOpenTaskChat ? (
+              <button
+                onClick={() => onOpenTaskChat(elem)}
+                className="mt-2 w-full flex items-center justify-center gap-1.5 text-xs py-1.5 rounded-lg border border-violet-300 bg-violet-50 text-violet-700 hover:bg-violet-100 transition font-medium"
+                title="Open Group Chat for this task"
+              >
+                <MessageCircle size={12} /> Group Chat
+              </button>
+            ) : null;
+
             if (elem.active) {
               return (
                 <div key={idx} className="snap-start">
@@ -253,6 +263,7 @@ const TaskList = ({ data }) => {
                     onReject={() => handleRejectClick(idx)}
                     onRequestPostpone={() => handlePostponeClick(idx, elem.taskDate)}
                   />
+                  {chatBtn}
                 </div>
               );
             }
@@ -268,6 +279,7 @@ const TaskList = ({ data }) => {
                     onReject={() => handleRejectClick(idx)}
                     onRequestPostpone={() => handlePostponeClick(idx, elem.taskDate)}
                   />
+                  {chatBtn}
                 </div>
               );
             }
@@ -276,6 +288,7 @@ const TaskList = ({ data }) => {
               return (
                 <div key={idx} className="snap-start">
                   <CompleteTask data={elem} />
+                  {chatBtn}
                 </div>
               );
             }
@@ -284,6 +297,7 @@ const TaskList = ({ data }) => {
               return (
                 <div key={idx} className="snap-start">
                   <FailedTask data={elem} />
+                  {chatBtn}
                 </div>
               );
             }
@@ -322,6 +336,7 @@ const TaskList = ({ data }) => {
                       {elem.rejectionReason}
                     </p>
                   </div>
+                  {chatBtn}
                 </div>
               );
             }

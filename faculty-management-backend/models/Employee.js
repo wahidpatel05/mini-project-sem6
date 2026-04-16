@@ -20,6 +20,12 @@ const taskSchema = new mongoose.Schema({
     enum: ["Low", "Medium", "High", "Critical"],
     default: "Medium",
   },
+  // Reference to a SharedTask when assigned to multiple employees
+  sharedTaskId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "SharedTask",
+    default: null,
+  },
   postponeRequests: [
     {
       requestedDate: String,
