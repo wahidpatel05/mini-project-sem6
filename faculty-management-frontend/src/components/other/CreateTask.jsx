@@ -73,8 +73,8 @@ const CreateTask = () => {
       setRecommendationsError("");
 
       try {
-        const result = await apiService.getTaskRecommendations(category, priority);
-        
+        const result = await apiService.getTaskRecommendations(category, priority, taskDate || null);
+
         if (result.recommendations) {
           setRecommendations(result.recommendations);
         } else {
@@ -91,7 +91,7 @@ const CreateTask = () => {
     // Debounce the API call
     const timer = setTimeout(fetchRecommendations, 500);
     return () => clearTimeout(timer);
-  }, [category, priority]);
+  }, [category, priority, taskDate]);
 
   /* ================= File Handling ================= */
 

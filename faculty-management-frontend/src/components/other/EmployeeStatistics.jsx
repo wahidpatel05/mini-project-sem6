@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Target, TrendingUp, AlertTriangle, Lightbulb, Activity, CheckCircle, Clock } from "lucide-react";
 
 const EmployeeStatistics = ({ data }) => {
-  const { taskCounts, tasks } = data;
+  const { taskCounts } = data;
 
   const stats = useMemo(() => {
     if (!taskCounts) return { total: 0, completed: 0, failed: 0, rejected: 0, successRate: 0, active: 0 };

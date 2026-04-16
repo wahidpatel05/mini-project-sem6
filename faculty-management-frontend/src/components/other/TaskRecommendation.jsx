@@ -1,5 +1,25 @@
 import React from "react";
-import { TrendingUp, AlertCircle, Sparkles, Lightbulb, Info, ArrowRight } from "lucide-react";
+import { TrendingUp, AlertCircle, Sparkles, Lightbulb, Info, ArrowRight, CalendarOff, Clock } from "lucide-react";
+
+const availabilityConfig = {
+  on_leave:       { label: "On Leave",       icon: <CalendarOff size={11} />, bg: "#FEE2E2", color: "#DC2626" },
+  returning_soon: { label: "Returning Soon", icon: <Clock size={11} />,       bg: "#FEF9C3", color: "#B45309" },
+  available:      { label: "Available",      icon: null,                        bg: null,      color: null },
+};
+
+const AvailabilityBadge = ({ status }) => {
+  const cfg = availabilityConfig[status];
+  if (!cfg || !cfg.bg) return null;
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+      style={{ background: cfg.bg, color: cfg.color }}
+    >
+      {cfg.icon}
+      {cfg.label}
+    </span>
+  );
+};
 
 const TaskRecommendation = ({ recommendations, loading, error, selectedEmployeeId, onSelectEmployee }) => {
   const getSourceBadge = (source) => {
@@ -94,6 +114,7 @@ const TaskRecommendation = ({ recommendations, loading, error, selectedEmployeeI
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles size={18} className="text-emerald-700" />
                 <h4 className="text-lg font-bold text-emerald-900">{topRecommendation.employeeName}</h4>
+                <AvailabilityBadge status={topRecommendation.availabilityStatus} />
               </div>
               <p className="text-xs text-emerald-700">{topRecommendation.email}</p>
             </div>
@@ -158,7 +179,10 @@ const TaskRecommendation = ({ recommendations, loading, error, selectedEmployeeI
 
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900">{rec.employeeName}</h4>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <h4 className="font-semibold text-gray-900">{rec.employeeName}</h4>
+                      <AvailabilityBadge status={rec.availabilityStatus} />
+                    </div>
                     <p className="text-xs text-gray-500">{rec.email}</p>
                   </div>
                   <div className={`text-center rounded-lg p-2 ${getScoreColor(rec.overallScore)}`}>

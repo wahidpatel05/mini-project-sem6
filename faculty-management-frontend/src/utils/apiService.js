@@ -220,11 +220,12 @@ export const apiService = {
     return response.json();
   },
 
-  getTaskRecommendations: async (taskCategory, taskPriority = "Medium") => {
+  getTaskRecommendations: async (taskCategory, taskPriority = "Medium", taskDate = null) => {
     const params = new URLSearchParams({
       taskCategory,
       taskPriority,
     });
+    if (taskDate) params.append("taskDate", taskDate);
 
     const response = await fetch(`${API_BASE_URL}/employees/recommendations/task?${params}`, {
       headers: { "Content-Type": "application/json", ...getAuthHeader() },
