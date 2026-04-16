@@ -1,0 +1,40 @@
+Presentation: Faculty Management System with ML Task Recommendation
+
+*** SLIDE 1: Title Slide ***
+Title: Faculty Management System
+Subtitle: Intelligent Task Allocation using Machine Learning
+Team/Student: [Your Name/Team Name]
+Project: 6th Semester Mini Project
+
+*** SLIDE 2: Introduction & Problem Statement ***
+- Problem: Manual task assignment to faculty/employees is often inefficient. Administrators struggle to fairly distribute workloads based on individual skills and past performance.
+- Solution: A modern web-based management system that automates task tracking and integrates a Machine Learning model to intelligently recommend the best employee for any specific task.
+- Goal: Increase productivity, ensure equitable workload distribution, and improve overall task completion rates through data-driven assignments.
+
+*** SLIDE 3: System Architecture ***
+The system is built on a full-stack architecture with a dedicated ML microservice:
+1. Frontend (User Interface): React.js and Vite styled with Tailwind CSS v4. Features role-based dashboards with JWT-based state management.
+2. Backend (Server & API): Node.js and Express API. Uses MongoDB (Mongoose) for schema-based data storage and Nodemailer for email notifications.
+3. ML Microservice (Task Recommendation): Python-based service utilizing Scikit-learn and Pandas. Exposes predictions and real-time learning endpoints to the backend.
+
+*** SLIDE 4: Machine Learning Integration ***
+- Algorithm Used: Random Forest Classifier (100 estimators, max depth of 10).
+- Workflow: 
+  - The model trains on historical employee data (skills, current workload, past task status).
+  - It analyzes features to predict the 'is_successful' target variable.
+  - When an Admin creates a new task, the system queries the ML model (via .pkl file serialization) to rank and recommend the most suitable employees.
+- Real-Time Learning: The system employs a feedback loop ('4_real_time_learning.py') to continually update model weights locally as employees succeed or fail at tasks.
+
+*** SLIDE 5: Key Features ***
+- Specialized Dashboards: Secure Admin and Employee views with JWT Authentication mapping.
+- ML Task Recommendations: Accurate assignment suggestions replacing manual guesswork.
+- Task Lifecycle Tracking: Real-time oversight of tasks through New, Accepted, Completed, and Failed states.
+- Performance Analytics & Reporting: Visual breakdown of faculty performance via backend analytics helpers.
+- Communication & Notifications: File upload support (Multer) and automated email alerts via Nodemailer.
+
+*** SLIDE 6: Conclusion & Future Enhancements ***
+- Conclusion: By combining a scalable React/Node.js stack with Scikit-learn, this system directly addresses administrative bottlenecks and improves faculty workload management through AI.
+- Future Enhancements:
+  - Migrate local ML predictions to a fully scalable cloud API endpoint.
+  - Implement predictive analytics for employee burnout tracking.
+  - Deeper integration with third-party calendars (Google Calendar) and enterprise communication tools.

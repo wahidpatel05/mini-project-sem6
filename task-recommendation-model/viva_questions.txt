@@ -1,0 +1,39 @@
+Viva Questions for ML Model (Random Forest)
+
+1. Algorithm Questions
+
+Q: Which machine learning algorithm did you use and why?
+A: We used the Random Forest Classifier. It was chosen because it handles tabular data well, prevents overfitting by averaging multiple decision trees, and works well for classification tasks like predicting task success.
+
+Q: What is a Random Forest?
+A: It is an ensemble learning method that builds multiple decision trees during training and outputs the majority vote of the classes for classification.
+
+Q: What does n_estimators=100 mean in your code?
+A: It means the Random Forest is built using 100 individual decision trees.
+
+Q: What does max_depth=10 do?
+A: It limits each decision tree to a maximum depth of 10 splits. This prevents the model from becoming too complex and overfitting the training data.
+
+2. Data & Training Questions
+
+Q: How did you split your dataset?
+A: We used an 80-20 split using train_test_split. 80% of the data was used for training the model, and 20% was used for testing/validation.
+
+Q: What is the target variable (label) in your model?
+A: The target variable is is_successful, which indicates whether an employee will successfully complete a given task.
+
+Q: What are the features (X) in your model?
+A: All columns in the dataset except the is_successful column. These represent employee attributes and task parameters.
+
+3. Model Evaluation Questions
+
+Q: How did you evaluate your model's performance?
+A: We used Accuracy Score (the percentage of correct predictions) and a Classification Report (which gives precision, recall, and f1-score).
+
+Q: What is the difference between Precision and Recall?
+A: Precision is the accuracy of positive predictions (avoiding false positives), while Recall is the ability to find all actual positive cases (avoiding false negatives).
+
+4. Implementation Questions
+
+Q: How is the model saved and reused in your backend?
+A: The model is serialized and saved as a .pkl (pickle) file using the joblib library. The prediction script or backend then loads this file to make real-time recommendations without needing to retrain.
