@@ -1,17 +1,18 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap");
 
 :root {
-  --bg: #0F172A;
-  --surface: #1E293B;
-  --surface-soft: #263044;
-  --text: #F1F5F9;
-  --text-muted: #94A3B8;
-  --border: rgba(148, 163, 184, 0.12);
-  --accent: #10B981;
-  --accent-dim: rgba(16, 185, 129, 0.15);
-  --danger: #F43F5E;
-  --warning: #F59E0B;
+  /* ── Aero-Light palette ───────────────────────── */
+  --bg:           #F8FAFC;   /* slate-50  */
+  --surface:      #FFFFFF;   /* white     */
+  --surface-soft: #F1F5F9;   /* slate-100 */
+  --text:         #0F172A;   /* slate-900 */
+  --text-muted:   #64748B;   /* slate-500 */
+  --border:       #E2E8F0;   /* slate-200 */
+  --accent:       #2563EB;   /* blue-600  */
+  --accent-dim:   rgba(37, 99, 235, 0.10);
+  --danger:       #EF4444;   /* red-500   */
+  --warning:      #F59E0B;   /* amber-500 */
 }
 
 body {
@@ -19,21 +20,16 @@ body {
   color: var(--text);
   font-family: "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
+  color-scheme: light;
 }
 
 #root {
   min-height: 100vh;
 }
 
-/* Suppress all gradients */
-[class*="bg-gradient-to-"] {
-  background-image: none !important;
-}
-
-[class*="text-transparent"][class*="bg-clip-text"] {
-  color: var(--text) !important;
-  background-image: none !important;
-  -webkit-text-fill-color: currentColor !important;
+/* Native form controls respect light mode */
+input, select, textarea {
+  color-scheme: light;
 }
 
 /* ─── Shell & Card ─────────────────────────────── */
@@ -46,7 +42,12 @@ body {
 .ui-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ui-card:hover {
+  border-color: #CBD5E1;
 }
 
 .ui-pill {
@@ -64,7 +65,7 @@ body {
 
 .filter-input {
   @apply w-full p-2 rounded-md border outline-none;
-  background: var(--surface-soft);
+  background: var(--surface);
   border-color: var(--border);
   color: var(--text);
 }
@@ -88,7 +89,7 @@ body {
 
 .input-ui {
   @apply w-full p-3 rounded-md border outline-none transition;
-  background: var(--surface-soft);
+  background: var(--surface);
   border-color: var(--border);
   color: var(--text);
 }
@@ -96,6 +97,20 @@ body {
 .input-ui:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px var(--accent-dim);
+}
+
+/* ─── Skeleton shimmer ─────────────────────────── */
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #E2E8F0 25%, #F1F5F9 50%, #E2E8F0 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 4px;
 }
 
 /* ─── Keyframes ────────────────────────────────── */
@@ -125,7 +140,7 @@ body {
 .animate-softPulse    { animation: softPulse 2s ease-in-out infinite; }
 .animate-slideUp      { animation: slideUp 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
 
-/* ─── Scrollbar (surface-colored) ─────────────── */
+/* ─── Scrollbar (light-mode) ───────────────────── */
 
 ::-webkit-scrollbar {
   width: 6px;
@@ -137,11 +152,11 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #CBD5E1;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #94A3B8;
 }
 

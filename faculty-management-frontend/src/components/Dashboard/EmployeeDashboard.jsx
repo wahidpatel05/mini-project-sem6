@@ -6,7 +6,21 @@ import TaskList from "../TaskList/TaskList";
 import NotificationsPanel from "../other/NotificationsPanel";
 import ChatRoom from "../other/ChatRoom";
 import { apiService } from "../../utils/apiService";
-import { Loader2, ClipboardList, ListTodo, MessageCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { ClipboardList, ListTodo, MessageCircle, ChevronDown, ChevronUp, X } from "lucide-react";
+
+/* ─── Skeleton shimmer block ─── */
+const Skeleton = ({ className = "" }) => (
+  <div className={`skeleton ${className}`} />
+);
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 14 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, delay: i * 0.07, ease: "easeOut" },
+  }),
+};
 
 const EmployeeDashboard = (props) => {
   const { data, changeUser } = props;
@@ -67,45 +81,60 @@ const EmployeeDashboard = (props) => {
     return () => clearInterval(interval);
   }, [data?._id, data?.id, changeUser]);
 
-  /* ─── Loading Screen ─── */
+  /* ─── Skeleton Loading Screen ─── */
   if (loading) {
     return (
-      <div className="ui-shell flex items-center justify-center">
-        <div className="ui-card p-6 flex items-center gap-3">
-          <Loader2 size={18} className="animate-spin" style={{ color: "var(--accent)" }} />
-          <p className="font-semibold text-lg" style={{ color: "var(--text)" }}>
-            Loading Dashboard...
-          </p>
+      <div className="min-h-screen" style={{ background: "var(--bg)" }}>
+        {/* Header skeleton */}
+        <div className="sticky top-0 z-30" style={{ background: "var(--surface)", borderBottom: "1px solid var(--border)" }}>
+          <div className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 h-14">
+            <Skeleton className="h-7 w-40 rounded-md" />
+            <Skeleton className="h-8 w-24 rounded-md" />
+          </div>
+        </div>
+        <div className="max-w-6xl mx-auto p-4 md:p-6 flex flex-col gap-5">
+          <div className="ui-card p-5">
+            <Skeleton className="h-5 w-32 mb-4 rounded" />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-16 rounded-lg" />)}
+            </div>
+          </div>
+          <div className="ui-card p-5">
+            <Skeleton className="h-5 w-40 mb-4 rounded" />
+            <div className="flex gap-4 overflow-hidden">
+              {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-52 w-72 flex-shrink-0 rounded-lg" />)}
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <motion.div
-      className="ui-shell"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-    >
+    <div className="min-h-screen" style={{ background: "var(--bg)" }}>
 
       {/* ─── Sticky Header ─── */}
-      <div className="sticky top-0 z-30" style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)" }}>
-        <Header changeUser={changeUser} data={employeeData} />
+      <div
+        className="sticky top-0 z-30"
+        style={{ background: "var(--surface)", borderBottom: "1px solid var(--border)" }}
+      >
+        <div className="max-w-6xl mx-auto">
+          <Header changeUser={changeUser} data={employeeData} />
+        </div>
       </div>
 
       {/* ─── Main Content ─── */}
-      <div className="p-4 md:p-7 flex flex-col gap-5">
+      <div className="max-w-6xl mx-auto p-4 md:p-6 flex flex-col gap-5">
 
         {/* Stats */}
         <motion.div
           className="ui-card p-4 md:p-6"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.05 }}
+          custom={0}
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
         >
-          <h2 className="text-base font-semibold mb-4 flex items-center gap-2"
-            style={{ color: "var(--text)" }}>
+          <h2 className="text-base font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--text)" }}>
             <ClipboardList size={17} style={{ color: "var(--accent)" }} />
             Task Overview
           </h2>
@@ -113,25 +142,21 @@ const EmployeeDashboard = (props) => {
         </motion.div>
 
         {/* Notifications */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-        >
+        <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible">
           <NotificationsPanel mode="employee" data={employeeData} />
         </motion.div>
 
-        {/* Chat with Admin */}
+        {/* Direct Message — Admin */}
         {adminId && (
           <motion.div
             className="ui-card p-4 md:p-6"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.15 }}
+            custom={2}
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
           >
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold flex items-center gap-2"
-                style={{ color: "var(--text)" }}>
+              <h2 className="text-base font-semibold flex items-center gap-2" style={{ color: "var(--text)" }}>
                 <MessageCircle size={17} style={{ color: "var(--accent)" }} />
                 Direct Message — Admin
               </h2>
@@ -139,7 +164,11 @@ const EmployeeDashboard = (props) => {
                 whileTap={{ scale: 0.97 }}
                 onClick={() => setDirectChatOpen((o) => !o)}
                 className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border font-medium transition"
-                style={{ background: "var(--surface-soft)", borderColor: "var(--border)", color: "var(--text-muted)" }}
+                style={{
+                  background: directChatOpen ? "var(--accent-dim)" : "var(--surface-soft)",
+                  borderColor: directChatOpen ? "var(--accent)" : "var(--border)",
+                  color: directChatOpen ? "var(--accent)" : "var(--text-muted)",
+                }}
               >
                 {directChatOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                 {directChatOpen ? "Close" : "Open"} Chat
@@ -169,12 +198,12 @@ const EmployeeDashboard = (props) => {
         {/* Task List */}
         <motion.div
           className="ui-card p-4 md:p-6"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
+          custom={3}
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
         >
-          <h2 className="text-base font-semibold mb-4 flex items-center gap-2"
-            style={{ color: "var(--text)" }}>
+          <h2 className="text-base font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--text)" }}>
             <ListTodo size={17} style={{ color: "var(--accent)" }} />
             Your Tasks
           </h2>
@@ -183,29 +212,67 @@ const EmployeeDashboard = (props) => {
 
       </div>
 
-      {/* ─── Floating Task Chat Panel ─── */}
+      {/* ─── Slide-over Task Chat Panel ─── */}
       <AnimatePresence>
         {chatOpen && chatRoomId && (
-          <motion.div
-            initial={{ opacity: 0, y: 30, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed bottom-4 right-4 w-80 sm:w-96 z-50 rounded-md overflow-hidden"
-            style={{ border: "1px solid var(--border)" }}
-          >
-            <ChatRoom
-              roomId={chatRoomId}
-              roomLabel={chatLabel}
-              currentUser={currentUser}
-              onClose={() => setChatOpen(false)}
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40"
+              style={{ background: "rgba(15,23,42,0.25)" }}
+              onClick={() => setChatOpen(false)}
             />
-          </motion.div>
+            {/* Slide-over panel from right */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 320, damping: 30 }}
+              className="fixed top-0 right-0 h-full w-full sm:w-96 z-50 flex flex-col"
+              style={{ background: "var(--surface)", borderLeft: "1px solid var(--border)" }}
+            >
+              {/* Panel header */}
+              <div
+                className="flex items-center justify-between px-4 py-3 flex-shrink-0"
+                style={{ borderBottom: "1px solid var(--border)" }}
+              >
+                <div className="flex items-center gap-2">
+                  <MessageCircle size={16} style={{ color: "var(--accent)" }} />
+                  <span className="text-sm font-semibold truncate" style={{ color: "var(--text)" }}>
+                    {chatLabel}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setChatOpen(false)}
+                  className="p-1.5 rounded-md transition"
+                  style={{ color: "var(--text-muted)" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-soft)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              {/* Chat content */}
+              <div className="flex-1 overflow-hidden">
+                <ChatRoom
+                  roomId={chatRoomId}
+                  roomLabel={chatLabel}
+                  currentUser={currentUser}
+                  onClose={() => setChatOpen(false)}
+                />
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
-    </motion.div>
+    </div>
   );
 };
 
 export default EmployeeDashboard;
+

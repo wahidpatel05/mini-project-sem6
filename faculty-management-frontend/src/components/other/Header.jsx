@@ -1,59 +1,66 @@
 import React from "react";
-import { LogOut } from "lucide-react";
+import { LogOut, GraduationCap } from "lucide-react";
 
 const Header = (props) => {
-
-  const logOutUser = () => {
-    props.changeUser();
-  };
-
   const username = props.data?.firstName || "Admin";
-  const role = props.data ? "Employee" : "Admin";
+  const role = props.data ? "Faculty" : "Admin";
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-6 py-4 rounded-md border"
-      style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-    >
-      {/* ================= LEFT ================= */}
-      <div className="flex items-center gap-3">
+    <div className="flex items-center justify-between px-4 sm:px-6 h-14">
 
-        {/* Avatar */}
+      {/* ── Brand ── */}
+      <div className="flex items-center gap-2.5">
         <div
-          className="h-10 w-10 rounded-full flex items-center justify-center font-bold text-sm"
-          style={{ background: "var(--accent-dim)", color: "var(--accent)" }}
+          className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{ background: "var(--accent)" }}
         >
-          {username.charAt(0).toUpperCase()}
+          <GraduationCap size={16} color="#fff" />
         </div>
-
-        {/* Greeting */}
-        <div>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Welcome back
-          </p>
-          <h1 className="text-lg sm:text-xl font-semibold" style={{ color: "var(--text)" }}>
-            {username}
-          </h1>
-          <span
-            className="inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-semibold"
-            style={{ background: "var(--accent-dim)", color: "var(--accent)" }}
-          >
-            {role}
-          </span>
-        </div>
-
+        <span className="font-bold text-base tracking-tight hidden sm:block" style={{ color: "var(--text)" }}>
+          Faculty Management
+        </span>
       </div>
 
-      {/* ================= RIGHT ================= */}
-      <button
-        onClick={logOutUser}
-        className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all active:scale-[0.98]"
-        style={{ background: "rgba(244,63,94,0.15)", color: "#F43F5E", border: "1px solid rgba(244,63,94,0.25)" }}
-        onMouseEnter={e => e.currentTarget.style.background = "rgba(244,63,94,0.25)"}
-        onMouseLeave={e => e.currentTarget.style.background = "rgba(244,63,94,0.15)"}
-      >
-        <LogOut size={16} />
-        Logout
-      </button>
+      {/* ── User + Logout ── */}
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          {/* Avatar */}
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+            style={{ background: "var(--accent-dim)", color: "var(--accent)" }}
+          >
+            {username.charAt(0).toUpperCase()}
+          </div>
+          {/* Name + Role */}
+          <div className="hidden sm:block leading-tight">
+            <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>
+              {username}
+            </p>
+            <span
+              className="text-xs font-medium px-1.5 py-0.5 rounded-full"
+              style={{ background: "var(--accent-dim)", color: "var(--accent)" }}
+            >
+              {role}
+            </span>
+          </div>
+        </div>
+
+        {/* Logout */}
+        <button
+          onClick={props.changeUser}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all active:scale-[0.97]"
+          style={{
+            background: "rgba(239,68,68,0.08)",
+            color: "var(--danger)",
+            border: "1px solid rgba(239,68,68,0.2)",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(239,68,68,0.15)")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(239,68,68,0.08)")}
+        >
+          <LogOut size={15} />
+          <span className="hidden sm:inline">Logout</span>
+        </button>
+      </div>
 
     </div>
   );
