@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Header from "../other/Header";
 import TaskListNumbers from "../other/TaskListNumbers";
 import TaskList from "../TaskList/TaskList";
@@ -17,7 +18,6 @@ const EmployeeDashboard = (props) => {
   const [adminId, setAdminId] = useState(null);
   const [directChatOpen, setDirectChatOpen] = useState(false);
 
-  // Build current-user identity for chat
   const currentUser = {
     id: data?._id || data?.id || "emp",
     name: data?.firstName || "Employee",
@@ -31,37 +31,28 @@ const EmployeeDashboard = (props) => {
     setChatOpen(true);
   };
 
-  // Compute deterministic direct-chat room ID (same formula as DirectChat.jsx)
   const getDirectRoomId = (id1, id2) => {
     const [a, b] = [id1, id2].sort();
     return `direct_${a}_${b}`;
   };
 
-  // Fetch admin profile so employee can compute the shared room ID
   useEffect(() => {
     apiService.getAdminProfile()
       .then((res) => { if (res && res._id) setAdminId(res._id); })
       .catch(() => {});
   }, []);
 
-  // Fetch employee data (auto refresh)
   useEffect(() => {
     const fetchEmployeeData = async () => {
       try {
         const employeeId = data?._id || data?.id;
-
         if (employeeId) {
-          const updatedEmployee =
-            await apiService.getEmployeeById(employeeId);
-          
+          const updatedEmployee = await apiService.getEmployeeById(employeeId);
           if (updatedEmployee && !updatedEmployee.message && updatedEmployee._id) {
             setEmployeeData(updatedEmployee);
           } else if (updatedEmployee && updatedEmployee.message === "Employee not found") {
-            // Handle deleted or not found employee
             localStorage.clear();
-            if (changeUser) {
-              changeUser("");
-            }
+            if (changeUser) changeUser("");
           }
         }
       } catch (error) {
@@ -73,18 +64,16 @@ const EmployeeDashboard = (props) => {
 
     fetchEmployeeData();
     const interval = setInterval(fetchEmployeeData, 3000);
-
     return () => clearInterval(interval);
   }, [data?._id, data?.id, changeUser]);
 
-  /* ================= Loading Screen ================= */
-
+  /* ─── Loading Screen ─── */
   if (loading) {
     return (
       <div className="ui-shell flex items-center justify-center">
         <div className="ui-card p-6 flex items-center gap-3">
-          <Loader2 size={18} className="text-slate-700 animate-spin" />
-          <p className="text-slate-700 font-semibold text-lg">
+          <Loader2 size={18} className="animate-spin" style={{ color: "var(--accent)" }} />
+          <p className="font-semibold text-lg" style={{ color: "var(--text)" }}>
             Loading Dashboard...
           </p>
         </div>
@@ -93,93 +82,129 @@ const EmployeeDashboard = (props) => {
   }
 
   return (
-    <div className="ui-shell">
+    <motion.div
+      className="ui-shell"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
 
-      {/* ================= Sticky Header ================= */}
-      <div className="sticky top-0 z-30 bg-white shadow-md">
+      {/* ─── Sticky Header ─── */}
+      <div className="sticky top-0 z-30" style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)" }}>
         <Header changeUser={changeUser} data={employeeData} />
       </div>
 
-      {/* ================= Main Content ================= */}
-      <div className="p-4 md:p-8">
+      {/* ─── Main Content ─── */}
+      <div className="p-4 md:p-7 flex flex-col gap-5">
 
-        {/* ================= Stats Section ================= */}
-        <div className="mb-6">
-          <div className="ui-card p-4 md:p-6 transition-all">
+        {/* Stats */}
+        <motion.div
+          className="ui-card p-4 md:p-6"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.05 }}
+        >
+          <h2 className="text-base font-semibold mb-4 flex items-center gap-2"
+            style={{ color: "var(--text)" }}>
+            <ClipboardList size={17} style={{ color: "var(--accent)" }} />
+            Task Overview
+          </h2>
+          <TaskListNumbers data={employeeData} />
+        </motion.div>
 
-            <h2 className="text-lg md:text-xl font-semibold text-slate-900 mb-4 flex items-center gap-2">
-              <ClipboardList size={18} className="text-slate-700" />
-              Task Overview
-            </h2>
-
-            <TaskListNumbers data={employeeData} />
-          </div>
-        </div>
-
-        {/* ================= Notifications ================= */}
-        <div className="mb-6">
-          
+        {/* Notifications */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+        >
           <NotificationsPanel mode="employee" data={employeeData} />
-        </div>
+        </motion.div>
 
-        {/* ================= Chat with Admin Section ================= */}
+        {/* Chat with Admin */}
         {adminId && (
-          <div className="mb-6">
-            <div className="ui-card p-4 md:p-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg md:text-xl font-semibold text-slate-900 flex items-center gap-2">
-                  <MessageCircle size={18} className="text-slate-700" />
-                  Direct Message — Admin
-                </h2>
-                <button
-                  onClick={() => setDirectChatOpen((o) => !o)}
-                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 hover:border-slate-500 font-medium transition"
-                >
-                  {directChatOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-                  {directChatOpen ? "Close Chat" : "Open Chat"}
-                </button>
-              </div>
+          <motion.div
+            className="ui-card p-4 md:p-6"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.15 }}
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-semibold flex items-center gap-2"
+                style={{ color: "var(--text)" }}>
+                <MessageCircle size={17} style={{ color: "var(--accent)" }} />
+                Direct Message — Admin
+              </h2>
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setDirectChatOpen((o) => !o)}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border font-medium transition"
+                style={{ background: "var(--surface-soft)", borderColor: "var(--border)", color: "var(--text-muted)" }}
+              >
+                {directChatOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                {directChatOpen ? "Close" : "Open"} Chat
+              </motion.button>
+            </div>
+            <AnimatePresence>
               {directChatOpen && (
-                <div className="mt-4 h-80">
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 320 }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="mt-4 overflow-hidden"
+                >
                   <ChatRoom
                     roomId={getDirectRoomId(currentUser.id, adminId)}
                     roomLabel="Chat with Admin"
                     currentUser={currentUser}
                     onClose={() => setDirectChatOpen(false)}
                   />
-                </div>
+                </motion.div>
               )}
-            </div>
-          </div>
+            </AnimatePresence>
+          </motion.div>
         )}
 
-        {/* ================= Task List Section ================= */}
-        <div>
-          <div className="ui-card p-4 md:p-6 transition-all">
+        {/* Task List */}
+        <motion.div
+          className="ui-card p-4 md:p-6"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+        >
+          <h2 className="text-base font-semibold mb-4 flex items-center gap-2"
+            style={{ color: "var(--text)" }}>
+            <ListTodo size={17} style={{ color: "var(--accent)" }} />
+            Your Tasks
+          </h2>
+          <TaskList data={employeeData} onOpenTaskChat={openTaskChat} />
+        </motion.div>
 
-            <h2 className="text-lg md:text-xl font-semibold text-slate-900 mb-4 flex items-center gap-2">
-              <ListTodo size={18} className="text-slate-700" />
-              Your Tasks
-            </h2>
+      </div>
 
-            <TaskList data={employeeData} onOpenTaskChat={openTaskChat} />
-          </div>
-        </div>
-
-        {/* ================= Task Chat Panel ================= */}
+      {/* ─── Floating Task Chat Panel ─── */}
+      <AnimatePresence>
         {chatOpen && chatRoomId && (
-          <div className="fixed bottom-4 right-4 w-80 sm:w-96 z-50 shadow-2xl rounded-2xl overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 30, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="fixed bottom-4 right-4 w-80 sm:w-96 z-50 rounded-md overflow-hidden"
+            style={{ border: "1px solid var(--border)" }}
+          >
             <ChatRoom
               roomId={chatRoomId}
               roomLabel={chatLabel}
               currentUser={currentUser}
               onClose={() => setChatOpen(false)}
             />
-          </div>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-      </div>
-    </div>
+    </motion.div>
   );
 };
 

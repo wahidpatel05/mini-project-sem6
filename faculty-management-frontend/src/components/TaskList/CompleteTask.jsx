@@ -1,6 +1,12 @@
 import React from "react";
+import { motion } from "framer-motion";
 import { CheckCircle2, Calendar, FileText } from "lucide-react";
 import { getFileUrl } from "../../utils/apiService";
+
+const isImageFile = (fileName) => {
+  const imageExts = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
+  return imageExts.some((ext) => fileName.toLowerCase().endsWith(ext));
+};
 
 const CompleteTask = ({ data }) => {
   const formatDateTime = (value) => {
@@ -9,101 +15,83 @@ const CompleteTask = ({ data }) => {
     if (Number.isNaN(date.getTime())) return "";
     return date.toLocaleString();
   };
-  const isImageFile = (fileName) => {
-    const imageExts = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
-    return imageExts.some((ext) => fileName.toLowerCase().endsWith(ext));
-  };
 
   return (
-    <div
-      className="
-      flex-shrink-0
-      w-full sm:w-[320px]
-      rounded-2xl
-      bg-white/80 backdrop-blur-lg
-      border border-emerald-200
-      shadow-lg hover:shadow-xl
-      transition-all duration-300
-      p-4 sm:p-5
-      hover:-translate-y-1
-    "
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      whileTap={{ scale: 0.98 }}
+      className="flex-shrink-0 w-full sm:w-[300px] rounded-md p-4 sm:p-5"
+      style={{
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
+        borderLeft: "3px solid #10B981",
+      }}
     >
-      {/* ================= Header ================= */}
+      {/* ─── Header ─── */}
       <div className="flex justify-between items-start gap-2">
-
-        {/* Category */}
-        <span className="bg-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full">
+        <span
+          className="text-xs font-semibold px-2 py-0.5 rounded-sm"
+          style={{ background: "rgba(16,185,129,0.12)", color: "#10B981", border: "1px solid rgba(16,185,129,0.3)" }}
+        >
           {data.category}
         </span>
-
-        {/* Date */}
-        <div className="flex items-center gap-1 text-gray-500 text-xs whitespace-nowrap">
-          <Calendar size={14} />
+        <div className="flex items-center gap-1 text-xs whitespace-nowrap" style={{ color: "var(--text-muted)" }}>
+          <Calendar size={13} />
           {data.taskDate}
         </div>
-
       </div>
 
-      {/* ================= Title ================= */}
-      <h2 className="mt-4 text-base sm:text-lg font-semibold text-gray-800 line-clamp-1">
+      {/* ─── Title ─── */}
+      <h2 className="mt-3 text-sm font-semibold line-clamp-1" style={{ color: "var(--text)" }}>
         {data.taskTitle}
       </h2>
 
-      {/* ================= Description ================= */}
-      <p className="text-sm mt-2 text-gray-600 line-clamp-3">
+      {/* ─── Description ─── */}
+      <p className="text-xs mt-1.5 line-clamp-3" style={{ color: "var(--text-muted)" }}>
         {data.taskDescription}
       </p>
 
-      {/* ================= Attachments ================= */}
+      {/* ─── Attachments ─── */}
       {data.attachments && data.attachments.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-emerald-200">
-          <p className="text-xs font-semibold text-gray-600 mb-2">Attachments:</p>
-          <div className="flex flex-wrap gap-2">
+        <div className="mt-3 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
+          <p className="text-xs font-semibold mb-2" style={{ color: "var(--text-muted)" }}>Attachments:</p>
+          <div className="flex flex-wrap gap-1.5">
             {data.attachments.map((attachment, index) => (
               <a
                 key={index}
                 href={getFileUrl(attachment.fileUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded px-2 py-1 text-xs transition"
+                className="flex items-center gap-1 px-2 py-0.5 rounded-sm text-xs transition"
+                style={{ background: "var(--surface-soft)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
               >
-                {isImageFile(attachment.fileName) ? (
-                  <span className="w-3 h-3 rounded bg-emerald-300 inline-block" />
-                ) : (
-                  <FileText size={12} className="text-emerald-600" />
-                )}
-                <span className="truncate max-w-[150px] text-emerald-700">
-                  {attachment.fileName}
-                </span>
+                {isImageFile(attachment.fileName)
+                  ? <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: "#10B981" }} />
+                  : <FileText size={11} style={{ color: "#10B981" }} />}
+                <span className="truncate max-w-[120px]">{attachment.fileName}</span>
               </a>
             ))}
           </div>
         </div>
       )}
 
-      {/* ================= Completed Status ================= */}
+      {/* ─── Status ─── */}
       <div
-        className="
-        mt-5 flex items-center justify-center gap-2
-        bg-emerald-100/80 backdrop-blur
-        text-emerald-700
-        rounded-xl py-2
-        text-sm font-semibold
-        border border-emerald-300
-        shadow-inner
-      "
+        className="mt-4 flex items-center justify-center gap-2 py-2 rounded-sm text-xs font-semibold"
+        style={{ background: "rgba(16,185,129,0.12)", color: "#10B981", border: "1px solid rgba(16,185,129,0.3)" }}
       >
-        <CheckCircle2 size={16} />
+        <CheckCircle2 size={14} />
         Completed
       </div>
 
       {data.completedAt && (
-        <p className="mt-2 text-xs text-gray-500 text-center">
+        <p className="mt-2 text-xs text-center" style={{ color: "var(--text-muted)" }}>
           Completed at {formatDateTime(data.completedAt)}
         </p>
       )}
-
-    </div>
+    </motion.div>
   );
 };
 
