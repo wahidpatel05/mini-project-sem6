@@ -2,7 +2,8 @@ import React, { useContext, useMemo, useState } from "react";
 import { AuthContext } from "../../context/AuthProvider";
 import EditEmployeeModal from "../other/EditEmployeeModal";
 import DeleteEmployee from "../other/DeleteEmployee";
-import { Search, User } from "lucide-react";
+import { Search, Download } from "lucide-react";
+import { apiService } from "../../utils/apiService";
 
 const EmployeeList = () => {
 
@@ -10,6 +11,34 @@ const EmployeeList = () => {
 
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [downloadingId, setDownloadingId] = useState(null);
+
+  /* ================= Download Report ================= */
+
+  const handleDownloadReport = async (emp) => {
+    setDownloadingId(emp._id);
+    try {
+      const response = await apiService.downloadReport(emp._id);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const now = new Date();
+      const month = now
+        .toLocaleString("en-US", { month: "long" })
+        .toLowerCase();
+      a.download = `report_${emp._id}_${month}_${now.getFullYear()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Report download failed:", err.message);
+      alert(`Could not download report: ${err.message}`);
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   /* ================= Search Filter ================= */
 
@@ -107,6 +136,22 @@ const EmployeeList = () => {
                   className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm transition"
                 >
                   Edit
+                </button>
+
+                <button
+                  onClick={() => handleDownloadReport(emp)}
+                  disabled={downloadingId === emp._id}
+                  title="Download Performance Report"
+                  className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm transition bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {downloadingId === emp._id ? (
+                    <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                  ) : (
+                    <Download size={14} />
+                  )}
+                  <span className="hidden sm:inline">
+                    {downloadingId === emp._id ? "..." : "Report"}
+                  </span>
                 </button>
 
                 <DeleteEmployee employeeId={emp._id} />
