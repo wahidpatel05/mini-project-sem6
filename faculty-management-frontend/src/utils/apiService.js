@@ -281,4 +281,20 @@ export const apiService = {
     if (!response.ok) throw new Error("Failed to fetch admin profile");
     return response.json();
   },
+
+  // ── Performance Reports ────────────────────────────────────────────────
+
+  downloadReport: async (employeeId) => {
+    const response = await fetch(
+      `${API_BASE_URL}/reports/employee/${employeeId}`,
+      {
+        headers: { ...getAuthHeader() },
+      }
+    );
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message || "Failed to download report");
+    }
+    return response;
+  },
 };
