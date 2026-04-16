@@ -136,12 +136,11 @@ app.get("/", (req, res) => {
 });
 const PORT = process.env.PORT || 5000;
 
-if (process.env.NODE_ENV !== "production") {
-  server.listen(PORT, () => {
-    console.log("Backend running locally on port", PORT);
-    console.log(process.env.FRONTEND_URL);
-  });
-}
+// Always listen on Render or locally
+server.listen(PORT, "0.0.0.0", () => {
+  console.log("Backend running on port", PORT);
+  console.log("Frontend URL allowed:", process.env.FRONTEND_URL);
+});
 
 app.get("/api/health", (req, res) => {
   res.json({ message: "Server is running" });
