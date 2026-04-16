@@ -71,7 +71,10 @@ const DirectChat = ({ employees, currentUser }) => {
             return (
               <div
                 key={emp._id}
+                role="button"
+                tabIndex={0}
                 onClick={() => handleSelectEmployee(emp._id)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSelectEmployee(emp._id); } }}
                 className={`cursor-pointer p-3 border-b flex items-center gap-3 transition-all min-h-[56px] ${
                   isSelected ? "bg-emerald-50 border-l-4 border-l-emerald-500" : "hover:bg-slate-100 border-l-4 border-l-transparent"
                 }`}
