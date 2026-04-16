@@ -3,8 +3,8 @@ import { TrendingUp, AlertCircle, Sparkles, Lightbulb, Info, ArrowRight, Calenda
 
 const availabilityConfig = {
   on_leave:       { label: "On Leave",       icon: <CalendarOff size={11} />, bg: "#FEE2E2", color: "#DC2626" },
-  returning_soon: { label: "Returning Soon", icon: <Clock size={11} />,       bg: "#FEF9C3", color: "#B45309" },
-  available:      { label: "Available",      icon: null,                        bg: null,      color: null },
+  returning_soon: { label: "Returning Soon", icon: <Clock size={11} />, bg: "#FEF9C3", color: "#B45309" },
+  available:      { label: "Available", icon: null, bg: null, color: null },
 };
 
 const AvailabilityBadge = ({ status }) => {
