@@ -1,30 +1,31 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
 :root {
-  --bg: #f3f5f7;
-  --surface: #ffffff;
-  --surface-soft: #f8fafc;
-  --text: #0f172a;
-  --text-muted: #64748b;
-  --border: #dbe3eb;
-  --primary: #0f172a;
-  --primary-soft: #e2e8f0;
-  --success: #0f766e;
-  --danger: #be123c;
-  --warning: #b45309;
+  --bg: #0F172A;
+  --surface: #1E293B;
+  --surface-soft: #263044;
+  --text: #F1F5F9;
+  --text-muted: #94A3B8;
+  --border: rgba(148, 163, 184, 0.12);
+  --accent: #10B981;
+  --accent-dim: rgba(16, 185, 129, 0.15);
+  --danger: #F43F5E;
+  --warning: #F59E0B;
 }
 
 body {
   background-color: var(--bg);
   color: var(--text);
-  font-family: "Manrope", sans-serif;
+  font-family: "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 #root {
   min-height: 100vh;
 }
 
+/* Suppress all gradients */
 [class*="bg-gradient-to-"] {
   background-image: none !important;
 }
@@ -35,6 +36,8 @@ body {
   -webkit-text-fill-color: currentColor !important;
 }
 
+/* ─── Shell & Card ─────────────────────────────── */
+
 .ui-shell {
   min-height: 100vh;
   background: var(--bg);
@@ -43,8 +46,7 @@ body {
 .ui-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  border-radius: 6px;
 }
 
 .ui-pill {
@@ -54,43 +56,92 @@ body {
   color: var(--text-muted);
 }
 
-.courier-prime-regular {
-  font-family: "Courier Prime", monospace;
-  font-weight: 400;
-  font-style: normal;
-}
-
-.courier-prime-bold {
-  font-family: "Courier Prime", monospace;
-  font-weight: 700;
-  font-style: normal;
-}
-
-.courier-prime-regular-italic {
-  font-family: "Courier Prime", monospace;
-  font-weight: 400;
-  font-style: italic;
-}
-
-.courier-prime-bold-italic {
-  font-family: "Courier Prime", monospace;
-  font-weight: 700;
-  font-style: italic;
-}
+/* ─── Form inputs ──────────────────────────────── */
 
 #tasklist::-webkit-scrollbar {
   display: none;
 }
 
 .filter-input {
-  @apply w-full p-2 rounded-lg border bg-gray-50 focus:ring-2 focus:ring-indigo-400 outline-none;
+  @apply w-full p-2 rounded-md border outline-none;
+  background: var(--surface-soft);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.filter-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-dim);
 }
 
 .pagination-btn {
-  @apply p-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40;
+  @apply p-2 rounded-md border disabled:opacity-40 transition;
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--surface-soft);
+  color: var(--text);
 }
 
 .input-ui {
-  @apply w-full p-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-slate-300 focus:border-slate-500 outline-none transition;
+  @apply w-full p-3 rounded-md border outline-none transition;
+  background: var(--surface-soft);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.input-ui:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-dim);
+}
+
+/* ─── Keyframes ────────────────────────────────── */
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes softPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(0.97); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeSlideIn  { animation: fadeSlideIn 0.35s ease both; }
+.animate-scaleIn      { animation: scaleIn 0.25s cubic-bezier(0.34,1.56,0.64,1) both; }
+.animate-softPulse    { animation: softPulse 2s ease-in-out infinite; }
+.animate-slideUp      { animation: slideUp 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+
+/* ─── Scrollbar (surface-colored) ─────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
 
