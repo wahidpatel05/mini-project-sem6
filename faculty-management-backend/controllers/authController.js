@@ -91,6 +91,7 @@ exports.employeeLogin = async (req, res) => {
         firstName: employee.firstName,
         email: employee.email,
         role: "employee",
+        isFirstLogin: employee.isFirstLogin,
         passwordChangedAt: employee.passwordChangedAt,
         taskCounts: employee.taskCounts,
         tasks: employee.tasks,

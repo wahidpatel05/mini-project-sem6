@@ -76,6 +76,10 @@ const employeeSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    isFirstLogin: {
+      type: Boolean,
+      default: true,
+    },
     taskCounts: {
       active: { type: Number, default: 0 },
       newTask: { type: Number, default: 0 },

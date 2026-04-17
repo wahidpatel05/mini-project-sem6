@@ -128,6 +128,9 @@ exports.updateEmployee = async (req, res) => {
         return res.status(400).json({ message: "Password must be at least 3 characters" });
       }
       employee.password = await bcrypt.hash(password, 10);
+      // Admin reset: force the employee to change password on next login
+      employee.isFirstLogin = true;
+      employee.passwordChangedAt = null;
     }
 
     await employee.save();
@@ -644,6 +647,7 @@ exports.changePassword = async (req, res) => {
       // First login - no need to verify old password
       employee.password = await bcrypt.hash(newPassword, 10);
       employee.passwordChangedAt = new Date();
+      employee.isFirstLogin = false;
 
       await employee.save();
 
