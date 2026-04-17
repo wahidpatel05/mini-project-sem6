@@ -14,6 +14,7 @@ const taskRoutes = require("./routes/task");
 const messageRoutes = require("./routes/message");
 const reportRoutes = require("./routes/report");
 const leaveRoutes = require("./routes/leave");
+const healthRoutes = require("./routes/health");
 
 // Import cron jobs
 const { startCronJobs } = require("./utils/cronJobs");
@@ -123,6 +124,7 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/leave", leaveRoutes);
+app.use("/health", healthRoutes);
 
 /* ======================================
    ROOT + HEALTH CHECK
@@ -140,10 +142,6 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, "0.0.0.0", () => {
   console.log("Backend running on port", PORT);
   console.log("Frontend URL allowed:", process.env.FRONTEND_URL);
-});
-
-app.get("/api/health", (req, res) => {
-  res.json({ message: "Server is running" });
 });
 
 /* ======================================
